@@ -1,4 +1,6 @@
-﻿# AnaTele
+﻿<p align="center"><img src="docs/images/anatele_concept2_logo_sheet.svg" width="720" alt="AnaTele logo"></p>
+
+# AnaTele
 
 **Evidence-first drone flight-log investigation.** AnaTele reads ArduPilot logs (Mission Planner `.tlog`,
 DataFlash `.bin`/`.log`) and turns them into a reproducible investigation:

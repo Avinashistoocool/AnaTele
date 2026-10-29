@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <style>
+      .bg { fill: #1e1e1e; }
+      .ring-grey { fill: none; stroke: #dcdcdc; stroke-width: 10; stroke-linecap: round; }
+      .hub-grey { fill: none; stroke: #dcdcdc; stroke-width: 7; }
+      .ring-red { fill: none; stroke: #e05a5a; stroke-width: 10; stroke-linecap: round; }
+      .hub-red { fill: #e05a5a; }
+      .tick-red { stroke: #e05a5a; stroke-width: 6; stroke-linecap: round; }
+      .dot-red { fill: #e05a5a; }
+      .path-blue { fill: none; stroke: #5ab4e0; stroke-width: 6.5; stroke-linecap: round; stroke-dasharray: 10 14; }
+      
+      .wordmark {
+        font-family: 'Inter', 'IBM Plex Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .text-grey { fill: #dcdcdc; }
+      .text-red { fill: #e05a5a; }
+      
+      /* Monochrome styles */
+      .mono-ring { fill: none; stroke: #dcdcdc; stroke-width: 5.5; stroke-linecap: round; }
+      .mono-hub { fill: none; stroke: #dcdcdc; stroke-width: 4; }
+      .mono-hub-solid { fill: #dcdcdc; }
+      .mono-tick { stroke: #dcdcdc; stroke-width: 3.5; stroke-linecap: round; }
+      .mono-path { fill: none; stroke: #dcdcdc; stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 5.5 8; }
+    </style>
+
+    <!-- Reusable Concept 2 Icon Symbol (viewBox 0 0 360 360) -->
+    <g id="anatele-icon">
+      <!-- Top-Left Rotor Ring -->
+      <circle class="ring-grey" cx="95" cy="95" r="62" />
+      <circle class="hub-grey" cx="95" cy="95" r="14" />
+
+      <!-- Bottom-Left Rotor Ring -->
+      <circle class="ring-grey" cx="95" cy="265" r="62" />
+      <circle class="hub-grey" cx="95" cy="265" r="14" />
+
+      <!-- Bottom-Right Rotor Ring -->
+      <circle class="ring-grey" cx="265" cy="265" r="62" />
+      <circle class="hub-grey" cx="265" cy="265" r="14" />
+
+      <!-- Breadcrumb Flight Path (Bottom-Left -> Bottom-Right -> Top-Left -> Top-Right Anomaly) -->
+      <path class="path-blue" d="
+        M 107 254
+        C 155 200, 225 200, 260 251
+        C 225 268, 175 262, 182 215
+        C 190 165, 205 130, 175 103
+        C 152 84, 128 92, 111 95
+        C 102 128, 130 165, 175 162
+        C 212 160, 238 135, 255 107
+      " />
+
+      <!-- Top-Right Rotor Ring (Coral-Red Anomaly / Target Reticle) -->
+      <circle class="ring-red" cx="265" cy="95" r="62" />
+      <circle class="hub-red" cx="265" cy="95" r="14" />
+      <!-- Reticle Tick Marks (12, 3, 6 o'clock + 1:30 anomaly dot) -->
+      <line class="tick-red" x1="265" y1="49" x2="265" y2="59" />
+      <line class="tick-red" x1="311" y1="95" x2="301" y2="95" />
+      <line class="tick-red" x1="265" y1="141" x2="265" y2="131" />
+      <circle class="dot-red" cx="291" cy="68" r="5.5" />
+    </g>
+
+    <!-- Reusable Monochrome Icon (viewBox 0 0 360 360) -->
+    <g id="anatele-icon-mono">
+      <circle class="mono-ring" cx="95" cy="95" r="62" />
+      <circle class="mono-hub" cx="95" cy="95" r="14" />
+
+      <circle class="mono-ring" cx="95" cy="265" r="62" />
+      <circle class="mono-hub" cx="95" cy="265" r="14" />
+
+      <circle class="mono-ring" cx="265" cy="265" r="62" />
+      <circle class="mono-hub" cx="265" cy="265" r="14" />
+
+      <path class="mono-path" d="
+        M 107 254
+        C 155 200, 225 200, 260 251
+        C 225 268, 175 262, 182 215
+        C 190 165, 205 130, 175 103
+        C 152 84, 128 92, 111 95
+        C 102 128, 130 165, 175 162
+        C 212 160, 238 135, 255 107
+      " />
+
+      <circle class="mono-ring" cx="265" cy="95" r="62" />
+      <circle class="mono-hub-solid" cx="265" cy="95" r="14" />
+      <line class="mono-tick" x1="265" y1="49" x2="265" y2="59" />
+      <line class="mono-tick" x1="311" y1="95" x2="301" y2="95" />
+      <line class="mono-tick" x1="265" y1="141" x2="265" y2="131" />
+      <circle class="mono-hub-solid" cx="291" cy="68" r="5.5" />
+    </g>
+  </defs>
+
+  <!-- Dark Charcoal Background -->
+  <rect class="bg" width="1280" height="720" />
+
+  <!-- Left: Large Standalone Icon -->
+  <g transform="translate(115, 180)">
+    <use href="#anatele-icon" />
+  </g>
+
+  <!-- Right Top: Primary Horizontal Lockup -->
+  <g transform="translate(605, 260) scale(0.48)">
+    <use href="#anatele-icon" />
+  </g>
+  <text class="wordmark" x="802" y="382" font-size="104">
+    <tspan class="text-grey">Ana</tspan><tspan class="text-red">T</tspan><tspan class="text-grey">ele</tspan>
+  </text>
+
+  <!-- Right Bottom: Single-Colour Monochrome Lockup -->
+  <g transform="translate(738, 492) scale(0.28)">
+    <use href="#anatele-icon-mono" />
+  </g>
+  <text class="wordmark text-grey" x="854" y="563" font-size="52" font-weight="500">AnaTele</text>
+</svg>

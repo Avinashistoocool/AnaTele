@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anatele"
-version = "0.3.0"
+version = "0.3.1"
 description = "Evidence-first drone flight-log investigation: timelines, flight phases, rule-based diagnostics, mission reconstruction, 3D replay and a flight simulator for ArduPilot logs."
 readme = "README.md"
 license = "MIT"

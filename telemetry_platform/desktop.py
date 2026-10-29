@@ -993,6 +993,8 @@ class MainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("AnaTele")
+    from PySide6.QtGui import QIcon
+    app.setWindowIcon(QIcon(str(Path(__file__).parent / "static" / "icon.png")))
     apply_theme(app)
     window = MainWindow()
     window.show()

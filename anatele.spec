@@ -13,5 +13,6 @@ hidden = collect_submodules("pymavlink.dialects") + collect_submodules("uvicorn"
 a = Analysis(["anatele.py"], datas=datas, hiddenimports=hidden,
              excludes=["tkinter", "PySide6.QtWebEngineCore", "PySide6.Qt3DCore", "PySide6.QtQuick"])
 pyz = PYZ(a.pure)
-exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="AnaTele", console=False)
+exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="AnaTele", console=False,
+          icon="telemetry_platform/static/icon.png")
 coll = COLLECT(exe, a.binaries, a.datas, name="AnaTele")
