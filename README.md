@@ -38,7 +38,14 @@ No Python needed. Grab the build for your OS from the [latest release](https://g
 | Linux | [AnaTele-linux.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-linux.zip) | Extract ? `./AnaTele/AnaTele` |
 
 Each zip includes five simulated flights in `simulations/`. Open `sim_motor_failure.tlog` to try it.
-The builds are unsigned, so your OS may warn you the first time you run them.
+The builds are not code-signed, so your OS may warn you the first time you run them. To check that a download is genuine:
+
+```bash
+# compare with SHA256SUMS.txt attached to the release
+sha256sum AnaTele-windows.zip            # PowerShell: Get-FileHash AnaTele-windows.zip
+# or verify the signed GitHub build provenance (GitHub CLI)
+gh attestation verify AnaTele-windows.zip --repo Avinashistoocool/AnaTele
+```
 
 ## Quick start (from source)
 

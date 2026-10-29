@@ -20,6 +20,22 @@ Windows, macOS and Linux and attaches it to the GitHub release together with the
 
 The build is unsigned. Windows SmartScreen may ask you to confirm (*More info → Run anyway*); on macOS, right-click → *Open*.
 
+**Verifying a download.** Each release includes `SHA256SUMS.txt` and a Sigstore-signed build-provenance attestation
+that ties every asset to the exact workflow run and commit that produced it:
+
+```bash
+gh attestation verify AnaTele-windows.zip --repo Avinashistoocool/AnaTele
+```
+
+**Supply-chain hardening.** Release builds install only hash-locked dependencies from `requirements/release.txt`
+(`--require-hashes`). Every GitHub Action is pinned to a full commit SHA, and the build jobs have a read-only token with
+no persisted credentials. Only a final publish job, which runs no third-party build tooling, can write to the release.
+To update the lock:
+
+```bash
+uv pip compile requirements/release.in --universal --python-version 3.12 --generate-hashes -o requirements/release.txt
+```
+
 Build locally:
 
 ```bash
