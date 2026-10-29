@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e ".[desktop,dev]"
+      - run: pyflakes telemetry_platform anatele.py run.py
+      - name: Tests (desktop GUI runs offscreen)
+        env:
+          QT_QPA_PLATFORM: offscreen
+          MPLBACKEND: Agg
+        run: python -m unittest discover -p "test_*.py" -v
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t anatele:ci .
+      - name: Smoke test container
+        run: |
+          docker run -d --name anatele -p 127.0.0.1:8766:8766 anatele:ci
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:8766/api/health && break; sleep 1; done
+          curl -fs -F "file=@/dev/null;filename=x.exe" http://127.0.0.1:8766/api/logs || true
+          docker exec anatele ls /app/simulations
+          docker logs anatele

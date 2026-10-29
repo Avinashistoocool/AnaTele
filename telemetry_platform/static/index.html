@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AnaTele — Flight Investigation</title>
+<link rel="stylesheet" href="/style.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<header><div><span class="brand">AnaTele</span><span class="subtitle">Flight investigation / local preview</span></div><span id="health">Connecting…</span></header>
+<div id="error" role="alert" hidden></div>
+<div class="layout">
+<aside>
+<h2>Upload a recording</h2>
+<p class="muted">Read-only analysis. Logs stay on this machine. Maximum 100 MiB.</p>
+<form id="upload-form">
+<label for="file">Mission Planner tlog, DataFlash bin/log, or mapped CSV</label>
+<input id="file" type="file" accept=".tlog,.bin,.log,.csv" required>
+<label for="profile">Attach an immutable profile version</label><select id="profile"><option value="">No profile — generic screening</option></select>
+<button id="upload-button" type="submit">Upload and analyse</button>
+</form>
+<details><summary>Create a drone profile</summary>
+<form id="profile-form">
+<label for="drone-key">Aircraft key (reuse to create a new version)</label><input id="drone-key" required pattern="[a-zA-Z0-9_-]+" placeholder="quad-01">
+<label for="drone-name">Name</label><input id="drone-name" required placeholder="Test quad">
+<label for="frame">Frame</label><input id="frame" placeholder="Quad-X, operator-declared">
+<label for="firmware">Firmware</label><input id="firmware" placeholder="ArduCopter 4.7.2, operator-declared">
+<label for="vibration">Vibration screening threshold (m/s²)</label><input id="vibration" type="number" min=".1" max="500" step=".1" value="30">
+<label for="expected-params">Expected parameters (NAME=value per line)</label><textarea id="expected-params" rows="3" placeholder="FS_THR_VALUE=975&#10;FRAME_CLASS=1"></textarea>
+<label for="notes">Notes / operating assumptions</label><textarea id="notes" rows="3"></textarea>
+<button type="submit">Save new version</button>
+</form></details>
+<h2>Recordings</h2><div id="logs"><p class="muted">No recordings yet.</p></div>
+<p class="muted">No live MAVLink connection, parameter writes, or flight commands. This is not an airworthiness assessment.</p>
+</aside>
+<main>
+<section id="welcome"><h1>Follow the evidence.</h1><p>Upload a log to inspect its sources, event timeline, measurements and diagnostic limitations.</p>
+<div class="notice">A warning is not a root cause. Missing telemetry is not a healthy result. Estimates and hypotheses stay separate from original records.</div>
+<p>Try the generated <code>samples\demo.tlog</code> for a synthetic, clearly labelled incident scenario.</p></section>
+<section id="job-header" hidden><h1 id="filename"></h1><p id="job-status"></p><progress id="progress" max="100" value="0"></progress></section>
+<div id="analysis" hidden>
+<div class="metrics" id="metrics"></div>
+<div class="toolbar"><a id="report-link" target="_blank" rel="noopener">Open printable report</a><a id="original-link">Download original</a><span id="profile-info"></span></div>
+<div class="notice" id="quality"></div>
+<section><h2>Sources and measurements</h2>
+<div class="controls"><div><label for="source">Source</label><select id="source"></select></div><div><label for="epoch">Clock epoch</label><select id="epoch"></select></div><div><label for="signal">Signal</label><select id="signal"></select></div></div>
+<p id="cursor" class="muted">Click an event or graph to inspect its evidence.</p>
+<div class="plots"><div><h3 id="signal-title">Signal</h3><canvas id="chart" width="900" height="300" aria-label="Selected signal plot"></canvas><p class="muted">Min/max envelope; diagnosis uses observations, not this chart. Gaps are not interpolated.</p></div>
+<div><h3>Recorded position</h3><canvas id="map" width="900" height="300" aria-label="Recorded longitude latitude path"></canvas><p class="muted">Coordinate plot, not a navigation map. No terrain correction or waypoint-completion inference.</p></div></div>
+</section>
+<section><h2>Armed episodes and flight phases</h2><p class="muted">Takeoff is reported by landed-state messages when present, otherwise inferred from home-relative altitude rise with throttle/motor demand (labelled). Pre-event windows end 3 s before a crash report or at the first large attitude excursion.</p><div id="phases"></div></section>
+<section><h2>Investigation hypotheses</h2><p class="muted">Screening order from capped support per evidence family minus explicit contradictions. Not a probability.</p><div id="hypotheses"></div></section>
+<section><h2>Findings (triggered rules)</h2><div id="findings"></div></section>
+<section><h2>Rule coverage</h2><p class="muted">Every rule reports triggered, not triggered, unassessable or not applicable. Not triggered is not "healthy"; unassessable means the data could not answer.</p>
+<div class="controls"><div><label for="rule-state">State</label><select id="rule-state"><option value="">All</option><option>triggered</option><option>not_triggered</option><option>unassessable</option><option>not_applicable</option></select></div></div>
+<p id="rule-pack" class="muted"></p><div class="table-wrap"><table><thead><tr><th>Rule</th><th>Scope</th><th>State</th><th>Detail</th></tr></thead><tbody id="rules"></tbody></table></div></section>
+<section><h2>Unified event timeline</h2>
+<div class="controls"><div><label for="severity">Severity</label><select id="severity"><option value="">All</option><option>critical</option><option>error</option><option>warning</option><option>notice</option><option>info</option></select></div><div><label for="search">Text / event type</label><input id="search" placeholder="PreArm, compass, mission…"></div><label class="inline"><input id="collapse" type="checkbox" checked>Collapse repeated messages</label><button id="filter-events" type="button">Filter</button></div>
+<p id="event-count" class="muted"></p><div class="table-wrap"><table><thead><tr><th>Time</th><th>Type</th><th>Evidence</th></tr></thead><tbody id="events"></tbody></table></div>
+<div class="toolbar"><button id="previous-events">Previous</button><button id="next-events">Next</button></div>
+</section>
+<section><h2>Observed parameters</h2><p class="muted">Requested writes do not replace reported values. Unknown encodings are shown as raw float fields, not trusted typed values.</p>
+<div class="controls"><input id="parameter-search" aria-label="Parameter name filter" placeholder="BATT_, ARMING_, FS_…"><button id="filter-parameters">Filter parameters</button></div>
+<p id="parameter-summary"></p><div class="table-wrap"><table><thead><tr><th>Name</th><th>Value</th><th>Encoding</th><th>Evidence</th></tr></thead><tbody id="parameters"></tbody></table></div></section>
+<section><h2>Parameter differences</h2><p class="muted">Compare this log's vehicle parameters with another analysed log or with the attached profile's expected values.</p>
+<div class="controls"><div><label for="diff-against">Compare against</label><select id="diff-against"></select></div><button id="run-diff" type="button">Compare parameters</button></div>
+<p id="diff-summary" class="muted"></p><div class="table-wrap"><table><thead><tr><th>Name</th><th>This log</th><th>Other</th><th>Meaning (semantic pack)</th></tr></thead><tbody id="diff"></tbody></table></div></section>
+<section><h2>Mission transfer evidence</h2><p id="mission-limitation" class="muted"></p><div id="missions"></div><h3>Plan versions and execution</h3><div id="mission-execution"></div></section>
+<section><h2>Compare flights and trends</h2><p class="muted">Side-by-side metrics are aligned by flight phase. Trends use flights uploaded with a profile of the same aircraft key.</p>
+<div class="controls"><div><label for="compare-with">Compare with log</label><select id="compare-with"></select></div><button id="run-compare" type="button">Compare</button>
+<div><label for="trend-key">Aircraft key</label><input id="trend-key" placeholder="quad-01"></div><button id="run-trends" type="button">Show trends</button></div>
+<div id="comparison"></div></section>
+<section><h2>Data quality and unsupported checks</h2><ul id="limitations"></ul><div id="diagnostics"></div></section>
+</div>
+</main>
+<section class="evidence" id="evidence-panel" hidden><div class="toolbar"><h2>Original record</h2><button id="close-evidence">Close</button></div><p id="evidence-label"></p><pre id="evidence"></pre></section>
+</div>
+</body>
+</html>

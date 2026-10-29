@@ -1,0 +1,11 @@
+# Conventions shared by ArduPilot firmware. Used when no version-specific pack matches.
+id: ardupilot-common
+match:
+  autopilot: 3   # MAV_AUTOPILOT_ARDUPILOTMEGA
+# ArduPilot sends integer parameters as a C cast to float in PARAM_VALUE (MAVLink parameter
+# protocol, "C-cast" encoding) while advertising only MAV_PROTOCOL_CAPABILITY_PARAM_FLOAT.
+# Values are still checked for integrality and type range before use.
+param_encoding: c_cast
+# Counters that change during normal operation; changes are not configuration events.
+volatile_parameters: [STAT_RUNTIME, STAT_FLTTIME, STAT_BOOTCNT, STAT_RESET, STAT_DISTFLWN]
+parameters: {}

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anatele"
+version = "0.3.0"
+description = "Evidence-first drone flight-log investigation: timelines, flight phases, rule-based diagnostics, mission reconstruction, 3D replay and a flight simulator for ArduPilot logs."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Avinash" }]
+requires-python = ">=3.11"
+keywords = ["drone", "ardupilot", "mavlink", "tlog", "dataflash", "flight-log", "uav", "diagnostics"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Science/Research",
+]
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.30,<1",
+    "python-multipart>=0.0.18,<1",
+    "pymavlink>=2.4.49,<3",
+    "duckdb>=1.2,<2",
+    "pyyaml>=6,<7",
+    "matplotlib>=3.8,<4",
+    "pillow>=10",
+]
+
+[project.optional-dependencies]
+desktop = ["PySide6>=6.7,<7"]
+dev = ["httpx>=0.27,<1", "pyflakes", "pyinstaller>=6.6"]
+
+[project.scripts]
+anatele = "telemetry_platform.cli:main"
+anatele-web = "telemetry_platform.server:main"
+anatele-sim = "telemetry_platform.simulator:main"
+
+[project.urls]
+Homepage = "https://github.com/Avinashistoocool/AnaTele"
+Issues = "https://github.com/Avinashistoocool/AnaTele/issues"
+
+[tool.setuptools]
+packages = ["telemetry_platform"]
+
+[tool.setuptools.package-data]
+telemetry_platform = ["static/*", "rules/*.yaml", "semantics/*.yaml"]

@@ -1,0 +1,6 @@
+FMT, 128, 89, FMT, BBnNZ, Type,Length,Name,Format,Columns
+FMT, 129, 75, MSG, QZ, TimeUS,Message
+FMT, 130, 28, VIBE, QBfffI, TimeUS,IMU,VibeX,VibeY,VibeZ,Clip
+MSG, 1000000, ArduCopter V4.7.2
+VIBE, 2000000, 0, 1, 2, 12, 100
+VIBE, 3000000, 0, 1, 2, 66, 105

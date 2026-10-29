@@ -1,0 +1,22 @@
+services:
+  anatele:
+    build: .
+    image: anatele:latest
+    # Published on the host's loopback only. AnaTele has no login: put an authenticating
+    # reverse proxy in front before exposing it to anyone else.
+    ports:
+      - "127.0.0.1:8766:8766"
+    environment:
+      ANATELE_ALLOWED_HOSTS: "localhost,127.0.0.1"
+    volumes:
+      - anatele-data:/data
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+
+volumes:
+  anatele-data:

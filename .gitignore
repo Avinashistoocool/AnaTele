@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+data/
+build/
+dist/
+*.egg-info/
+# Private working notes and real flight logs (GPS positions) stay local.
+HANDOFF.md
+*.real.tlog
+simulations/

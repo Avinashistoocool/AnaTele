@@ -1,0 +1,314 @@
+# AnaTele core rule pack. Declarative, versioned, evaluated by telemetry_platform/rules.py.
+# Thresholds and windows are screening choices, not firmware behaviour, unless stated.
+# States: triggered | not_triggered | unassessable | not_applicable.
+pack: core
+version: 2
+family_cap: 1.5
+hypotheses:
+  - id: magnetic-estimation
+    title: Estimator/magnetic inconsistency
+    severity_if_real: critical
+    support:
+      - {rule: compass-event-before-crash-check, family: estimator, weight: 1}
+      - {rule: ekf-compass-innovation-pre-event, family: magnetic, weight: 1}
+      - {rule: compasses-inconsistent-reported, family: magnetic, weight: 0.25}
+    contradict:
+      - {rule: compass-event-before-crash-check, flag: contradictions, weight: 1}
+    discriminate: "Onboard XKF4 magnetic innovations per core and MAG field strength vs throttle (compassmot) would separate interference from a wrong yaw estimate."
+  - id: thrust-or-configuration
+    title: Mechanical/thrust-generation or frame configuration problem
+    severity_if_real: critical
+    support:
+      - {rule: tracking-loss, family: control, weight: 1}
+      - {rule: motor-floor-saturation-pre-event, family: propulsion, weight: 1}
+      - {rule: motor-output-imbalance-pre-event, family: propulsion, weight: 0.75}
+      - {rule: motor-ceiling-saturation, family: propulsion, weight: 0.5}
+    contradict: []
+    discriminate: "ESC RPM/current telemetry, a motor-order/direction test (props off) and inspection of motor mounts and props."
+  - id: vibration-estimation
+    title: Vibration-driven estimation degradation
+    severity_if_real: critical
+    support:
+      - {rule: vibration-persistent-pre-event, family: inertial, weight: 1}
+      - {rule: clipping-pre-event, family: inertial, weight: 1}
+    contradict:
+      - {rule: vibration-persistent-pre-event, state: not_triggered, weight: 0.5}
+      - {rule: clipping-pre-event, state: not_triggered, weight: 0.5}
+    discriminate: "Onboard high-rate IMU/VIBE logs and FFT before the event; vibration only at impact is a consequence, not a cause."
+  - id: power-degradation
+    title: Electrical/power degradation
+    severity_if_real: critical
+    blocked_by: [power-monitoring-gap]
+    support: []
+    contradict: []
+    discriminate: "A working battery monitor (voltage/current) or onboard POWR/BAT logs are required before this can be assessed."
+rules:
+  - id: crash-check-disarm
+    version: 1
+    title: Crash-check disarm reported
+    severity: critical
+    kind: observation
+    per: event
+    detector: {type: event_present, kinds: [CRASH_CHECK_DISARM]}
+    detail: "Observed autopilot report, not a component diagnosis. {firmware_note}"
+    firmware_notes:
+      arducopter-4.7.2: "Assuming the reported build matches official Copter 4.7.2, AngErr means thrust-vector tracking error, not yaw error."
+      default: "Internal detector conditions have not been matched to this firmware."
+    missing: [onboard controller/estimator evidence, physical inspection]
+
+  - id: compass-event-before-crash-check
+    version: 1
+    title: Compass-selection event preceded disarm
+    severity: warning
+    kind: hypothesis
+    per: event
+    detector:
+      type: event_sequence
+      anchor_kinds: [CRASH_CHECK_DISARM]
+      precursor_kinds: [COMPASS_SELECTION, EKF_LANE_SWITCH, YAW_EVENT]
+      window_s: 20
+      support_signal: {signal: "ekf.*compass_ratio", above: 1.0, for_s: 2, lookback_s: 30,
+                       text: "EKF compass innovation test ratio exceeded 1.0 for >= 2 s before the precursor"}
+      contradict_onset: {signal: control.tilt_tracking_error_deg, above: 30, for_s: 0.5,
+                         text: "Tilt tracking error exceeded 30 deg before the first precursor event"}
+    detail: "{precursor_text} occurred {lead_s:.1f} s before the crash-check report (20-second screening window). Switching can be recovery, not the initiating cause. No causal probability is assigned."
+    detail_not_triggered: "No compass/lane/yaw event in the 20 s before this crash-check report."
+    missing: [active EKF core, magnetic innovations per core, pre-event mechanical/thrust evidence]
+
+  - id: prearm-radio-failsafe
+    version: 2
+    title: Radio failsafe blocked arming
+    severity: warning
+    kind: observation
+    per: source
+    detector:
+      type: event_present
+      text_regex: "PreArm: Radio failsafe"
+      requires_messages: [STATUSTEXT, MSG]
+      context_signals:
+        - {signal: "rc.ch{RCMAP_THROTTLE}", label: mapped throttle input, compare_param: FS_THR_VALUE, window_s: 2}
+    detail: "{count} recorded warnings. These establish the reported blocker, not its trigger. {context_text} Check valid-input freshness, receiver flags and overrides. A retained throttle value does not prove healthy reception."
+    missing: [receiver-wire evidence, complete RC configuration]
+
+  - id: arming-rejected-auto-mode
+    version: 1
+    title: Arming rejected in Auto mode
+    severity: notice
+    kind: observation
+    per: source
+    detector: {type: event_present, text_regex: "Auto mode not armable", requires_messages: [STATUSTEXT, MSG]}
+    detail: "{count} rejected attempts reported 'Auto mode not armable'. This is a mode/configuration rejection (see AUTO_OPTIONS), distinct from GPS or radio warnings."
+    missing: [arming-command method, AUTO_OPTIONS semantics for the exact build]
+
+  - id: arming-rejected-throttle-high
+    version: 1
+    title: Arming rejected with throttle high
+    severity: notice
+    kind: observation
+    per: source
+    detector: {type: event_present, text_regex: "Throttle too high", requires_messages: [STATUSTEXT, MSG]}
+    detail: "{count} rejection(s) reported 'Throttle too high'. Throttle-high checking is different from the low-throttle radio failsafe."
+    missing: [calibrated throttle input at the attempt]
+
+  - id: gps-configuration-rejected
+    version: 1
+    title: GPS receiver configuration rejected
+    severity: notice
+    kind: observation
+    per: source
+    detector:
+      type: event_present
+      text_regex: "unable to configure band|still configuring"
+      requires_messages: [STATUSTEXT, MSG]
+      context_signals:
+        - {signal: gps.fix_type, label: GPS fix type, window_s: 3}
+        - {signal: gps.h_acc_m, label: GPS horizontal accuracy (m), window_s: 3}
+    detail: "{count} receiver-configuration warnings. Operational impact is conditional on actual fix/accuracy and estimator use. {context_text}"
+    missing: [receiver configuration log, estimator GPS acceptance]
+
+  - id: compasses-inconsistent-reported
+    version: 1
+    title: Compasses reported inconsistent
+    severity: warning
+    kind: observation
+    per: source
+    detector: {type: event_present, text_regex: "Compasses inconsistent", requires_messages: [STATUSTEXT, MSG]}
+    detail: "{count} reports. Inconsistency reported after an incident does not establish inconsistency before flight; physical damage can also cause it."
+    missing: [pre-flight compass consistency evidence, per-compass field strengths]
+
+  - id: vibration-persistent-pre-event
+    version: 1
+    title: Sustained vibration before event
+    severity: warning
+    kind: observation
+    per: episode
+    detector:
+      type: persistence
+      signal: "imu.*.vibration.*"
+      phase: airborne_pre_event
+      max_gap_s: 1.5
+      criteria:
+        - {above: {profile: vibration_warning, default: 30}, for_s: 2}
+        - {above: 60, for_s: 1}
+      also_measure: [event_and_after]
+    detail: "{summary} ArduPilot guidance treats 30/60 m/s^2 as useful levels, not crash thresholds."
+    detail_not_triggered: "No vibration run met the persistence criteria in the airborne pre-event window. {summary}"
+    missing: [onboard high-rate IMU logs, mounting inspection]
+
+  - id: clipping-pre-event
+    version: 1
+    title: Accelerometer clipping before event
+    severity: warning
+    kind: observation
+    per: episode
+    detector:
+      type: counter_increment
+      signal: "imu.*.clipping_counter"
+      phase: airborne_pre_event
+      max_gap_s: 3
+      also_measure: [event_and_after]
+    detail: "{summary} Increments are measured between counter observations, not individual clip times."
+    detail_not_triggered: "No positive clipping increments in the airborne pre-event window. {summary}"
+    missing: [per-IMU onboard VIBE records]
+
+  - id: vibration-peak-sample
+    version: 1
+    title: "Elevated vibration sample: {series}"
+    severity: warning
+    kind: observation
+    per: series
+    detector: {type: peak, signal: "imu.*.vibration.*", above: {profile: vibration_warning, default: 30}}
+    detail: "Peak {peak:.2f} m/s^2 exceeds the {threshold:g} screening threshold. A single sample does not establish persistence, phase, or ordering relative to impact; see the persistence rule."
+    detail_not_triggered: "Peak {peak:.2f} m/s^2 did not exceed the {threshold:g} screening threshold."
+    missing: [phase-conditioned persistence assessment]
+
+  - id: tracking-loss
+    version: 2
+    title: Sustained attitude (tilt) tracking error before upset
+    severity: critical
+    kind: observation
+    per: episode
+    detector:
+      type: persistence
+      signal: control.tilt_tracking_error_deg
+      phase: airborne_pre_event
+      also_measure: [event_and_after]
+      max_gap_s: 1.0
+      criteria: [{above: 30, for_s: 0.5}]
+    detail: "{summary} Derived from desired vs estimated roll/pitch at different sample instants; distinguishes neither an implausible target, an estimate jump, nor thrust loss."
+    detail_not_triggered: "Tilt tracking error stayed below 30 deg for 0.5 s. {summary}"
+    missing: [high-rate ATT/RATE logs, body rates, measured motor response]
+
+  - id: ekf-compass-innovation-pre-event
+    version: 1
+    title: EKF compass innovations exceeded gate before event
+    severity: warning
+    kind: observation
+    per: episode
+    detector:
+      type: persistence
+      signal: "ekf.*compass_ratio"
+      phase: airborne_pre_event
+      max_gap_s: 2.5
+      criteria: [{above: 1.0, for_s: 2}]
+      also_measure: [armed_pre_takeoff]
+    detail: "{summary} ArduPilot reports innovation test ratios here (FS_EKF_THRESH compares against them); > 1 means magnetometer data disagreed with the estimate beyond the gate. Compare with the armed-on-ground value: a rise only once motors produce thrust is consistent with motor-current interference; a bad calibration or wrong yaw estimate are alternatives."
+    detail_not_triggered: "Compass test ratio did not exceed 1.0 for 2 s pre-event. {summary}"
+    missing: [per-core XKF4/XKF3 innovations, throttle-vs-field (compassmot) data]
+
+  - id: motor-ceiling-saturation
+    version: 2
+    title: Motor command at ceiling before upset
+    severity: warning
+    kind: observation
+    per: episode
+    detector:
+      type: persistence
+      signal: "motor.*.at_ceiling"
+      phase: airborne_pre_event
+      also_measure: [event_and_after]
+      max_gap_s: 1.5
+      criteria: [{above: 0.5, for_s: 1}]
+    detail: "{summary} Commands are not measured thrust. Saturation near an upset can be a consequence rather than a cause."
+    detail_not_triggered: "No motor stayed at its ceiling command for 1 s. {summary}"
+    missing: [ESC telemetry (RPM/current), propulsion inspection]
+
+  - id: motor-floor-saturation-pre-event
+    version: 1
+    title: Motor command held at floor before event
+    severity: warning
+    kind: observation
+    per: episode
+    detector:
+      type: persistence
+      signal: "motor.*.at_floor"
+      phase: airborne_pre_event
+      trim_start_s: 2
+      max_gap_s: 1.5
+      criteria: [{above: 0.5, for_s: 2}]
+    detail: "{summary} A motor commanded to its minimum while airborne means the controller wanted less thrust at that corner (or yaw torque). Consistent with a CG offset, a twisted/misaligned motor, wrong prop/direction, or a stronger motor; not a diagnosis."
+    detail_not_triggered: "No motor stayed at its floor command for 2 s pre-event. {summary}"
+    missing: [frame/motor-order verification, ESC telemetry, physical inspection]
+
+  - id: motor-output-imbalance-pre-event
+    version: 1
+    title: Motor output imbalance before event
+    severity: warning
+    kind: observation
+    per: episode
+    detector: {type: motor_balance, phase: airborne_pre_event, trim_start_s: 2, spread_above: 0.12}
+    detail: "{summary} Mean command spread across motors is a command-distribution anomaly, not a measured thrust deficit. Wind, yaw demand and payload offset are confounders."
+    detail_not_triggered: "Mean motor commands stayed within {spread_above:.2f} of each other. {summary}"
+    missing: [ESC telemetry, steady-hover segment, frame inspection]
+
+  - id: power-monitoring-gap
+    version: 1
+    title: No usable battery voltage observations
+    severity: warning
+    kind: coverage
+    per: source
+    detector: {type: coverage, signals: ["battery.voltage", "battery.*.volt"], during: armed}
+    detail: "No battery-voltage samples were recorded while armed. Power-related causes cannot be assessed (unassessable, not healthy)."
+    detail_not_triggered: "Battery voltage samples exist while armed."
+    missing: [battery monitor, onboard BAT/POWR logs]
+
+  - id: batt-monitor-disabled
+    version: 1
+    title: BATT_MONITOR configuration review
+    severity: notice
+    kind: configuration
+    per: snapshot
+    detector: {type: parameter, param: BATT_MONITOR, equals: 0}
+    detail: "Battery monitor instance 1 is disabled. Other monitor instances and alternative battery data must be checked."
+    missing: [independent verification of firmware/build and operating policy]
+
+  - id: fs-gcs-disabled
+    version: 1
+    title: FS_GCS_ENABLE configuration review
+    severity: notice
+    kind: configuration
+    per: snapshot
+    detector: {type: parameter, param: FS_GCS_ENABLE, equals: 0}
+    detail: "GCS-heartbeat failsafe is disabled. Suitability depends on the intended control and autonomous-mission policy."
+    missing: [operating policy]
+
+  - id: arming-skipchk-board-voltage
+    version: 1
+    title: ARMING_SKIPCHK configuration review
+    severity: notice
+    kind: configuration
+    per: snapshot
+    detector: {type: parameter, param: ARMING_SKIPCHK, bit: 7, requires_semantics: arducopter-4.7.2}
+    detail: "Bit 7 is set. Assuming official ArduCopter 4.7.2 semantics, this skips the board-voltage arming check, not compass checks."
+    missing: [independent verification of firmware/build]
+
+  - id: profile-parameter-mismatch
+    version: 1
+    title: Parameters differ from the attached profile
+    severity: notice
+    kind: configuration
+    per: snapshot
+    detector: {type: profile_parameters, tolerance: 0.0001}
+    detail: "{count} parameter(s) differ from the profile's expected values: {summary}"
+    detail_not_triggered: "All {checked} expected parameters that were observed match the profile."
+    missing: [confirmation of which configuration is intended]

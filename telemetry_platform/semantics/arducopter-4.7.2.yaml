@@ -1,0 +1,47 @@
+# Firmware semantic pack. Facts here are tied to the verified Copter-4.7.2 tag
+# (commit fb773567896014da007bca58358704d4a0d8516f). A reported version string is not
+# proof that the aircraft ran this exact official binary.
+id: arducopter-4.7.2
+extends: ardupilot-common
+match:
+  vehicle_types: [2, 3, 4, 13, 14, 15, 29]
+  firmware_version: "4.7.2"
+  git_hash_prefix: "fb773567"
+crash_check:
+  angle_error: "thrust-vector tracking error (deg), not yaw error"
+  gates: "armed, not landed, mode gate, filtered accel < 3 m/s^2, lean > 15 deg, tracking error > 30 deg, speed < 10 m/s, ~2 s persistence"
+parameters:
+  ARMING_SKIPCHK:
+    description: Arming checks to skip (bitmask)
+    bitmask: {7: board voltage}
+    note: "Bit 7 (value 128) skips the board-voltage check, not compass checks."
+  BATT_MONITOR:
+    description: Battery monitor type, instance 1
+    values: {0: Disabled}
+    note: "Disables instance 1 only; inspect BATT2_MONITOR etc."
+  FS_THR_ENABLE:
+    description: Throttle (radio) failsafe enable
+    values: {0: Disabled, 1: Enabled always RTL, 2: Enabled continue mission in Auto, 3: Enabled always Land, 4: Enabled always SmartRTL or RTL, 5: Enabled always SmartRTL or Land, 6: Enabled Auto DO_LAND_START or RTL, 7: Enabled always Brake or Land}
+  FS_THR_VALUE: {description: Throttle failsafe PWM threshold, units: PWM}
+  FS_GCS_ENABLE: {description: Ground station heartbeat failsafe enable, values: {0: Disabled}}
+  FS_CRASH_CHECK: {description: Crash check enable, values: {0: Disabled, 1: Enabled}}
+  FS_EKF_THRESH: {description: EKF failsafe variance threshold}
+  FS_VIBE_ENABLE: {description: Vibration failsafe enable}
+  AUTO_OPTIONS:
+    description: Auto mode options (bitmask)
+    bitmask: {0: allow arming, 1: allow takeoff without raising throttle, 2: ignore pilot yaw, 7: allow weathervaning}
+  RCMAP_THROTTLE: {description: Throttle input channel}
+  FRAME_CLASS: {description: Frame class, values: {1: Quad, 2: Hexa, 3: Octa}}
+  FRAME_TYPE: {description: Frame type, values: {0: Plus, 1: X}}
+  MOT_PWM_MIN: {description: Motor PWM minimum, units: PWM}
+  MOT_PWM_MAX: {description: Motor PWM maximum, units: PWM}
+  MOT_SPIN_MIN: {description: Motor minimum airborne output fraction}
+  MOT_SPIN_MAX: {description: Motor maximum output fraction}
+  MOT_THST_HOVER: {description: Learned hover throttle}
+  COMPASS_USE: {description: Use compass 1 for yaw}
+  COMPASS_USE2: {description: Use compass 2 for yaw}
+  COMPASS_USE3: {description: Use compass 3 for yaw}
+  EK3_SRC1_YAW: {description: EKF3 yaw source, values: {0: None, 1: Compass, 2: GPS, 3: GPS with compass fallback, 6: ExternalNav, 8: GSF}}
+  WP_RADIUS_M: {description: Waypoint acceptance radius, units: m}
+  GPS_AUTO_CONFIG: {description: GPS auto-configuration, values: {0: Disabled, 1: Enable for UART GPS, 2: Enable for all GPS}}
+  LOG_BITMASK: {description: Onboard log bitmask}

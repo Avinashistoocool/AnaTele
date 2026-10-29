@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+data/
+build/
+dist/
+*.egg-info/
+simulations/
+.git/
+docs/images/
+test_*.py
+fixtures/
