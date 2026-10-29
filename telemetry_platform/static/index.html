@@ -15,8 +15,8 @@
 <h2>Upload a recording</h2>
 <p class="muted">Read-only analysis. Logs stay on this machine. Maximum 100 MiB.</p>
 <form id="upload-form">
-<label for="file">Mission Planner tlog, DataFlash bin/log, or mapped CSV</label>
-<input id="file" type="file" accept=".tlog,.bin,.log,.csv" required>
+<label for="file">Mission Planner tlog, DataFlash bin/log, mapped CSV, or a shared AnaTele .ant analysis</label>
+<input id="file" type="file" accept=".tlog,.bin,.log,.csv,.ant" required>
 <label for="profile">Attach an immutable profile version</label><select id="profile"><option value="">No profile — generic screening</option></select>
 <button id="upload-button" type="submit">Upload and analyse</button>
 </form>
@@ -41,7 +41,7 @@
 <section id="job-header" hidden><h1 id="filename"></h1><p id="job-status"></p><progress id="progress" max="100" value="0"></progress></section>
 <div id="analysis" hidden>
 <div class="metrics" id="metrics"></div>
-<div class="toolbar"><a id="report-link" target="_blank" rel="noopener">Open printable report</a><a id="original-link">Download original</a><span id="profile-info"></span></div>
+<div class="toolbar"><a id="report-link" target="_blank" rel="noopener">Open printable report</a><a id="original-link">Download original</a><a id="ant-link" title="Shareable analysis without the raw log">Save analysis (.ant)</a><a id="ant-original-link" title="Includes the raw log, which contains GPS positions">Save .ant with original log</a><span id="profile-info"></span></div>
 <div class="notice" id="quality"></div>
 <section><h2>Sources and measurements</h2>
 <div class="controls"><div><label for="source">Source</label><select id="source"></select></div><div><label for="epoch">Clock epoch</label><select id="epoch"></select></div><div><label for="signal">Signal</label><select id="signal"></select></div></div>

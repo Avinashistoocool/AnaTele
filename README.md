@@ -65,6 +65,7 @@ This opens the desktop application with the simulated motor failure loaded. Pref
 ```bash
 anatele analyse simulations/sim_motor_failure.tlog
 anatele replay  simulations/sim_motor_failure.tlog --out where_it_went.gif
+anatele export  simulations/sim_motor_failure.tlog -o motor_failure.ant   # share it; open with `anatele motor_failure.ant`
 ```
 
 ## What's inside
@@ -81,6 +82,7 @@ anatele replay  simulations/sim_motor_failure.tlog --out where_it_went.gif
 | **Flight path** | Interactive 3D replay: path coloured by flight mode, waypoint status, takeoff/upset/crash markers and a live aircraft attitude glyph. Exports to GIF or PNG. Coordinates are local metres, so screenshots don't reveal your field. |
 | **Comparison** | Parameter diff (log vs log, or log vs profile), side-by-side flights aligned by phase, and per-aircraft trends. |
 | **Simulator** | Quad physics with an ArduPilot-like mixer, waypoint guidance, wind, crash check and failsafes. Scenarios: `nominal`, `motor_failure`, `compass_interference`, `vibration`, `radio_failsafe`. |
+| **Sharing** | Save any analysis as a single **`.ant`** file (*ANalysed Telemetry*) that opens straight into AnaTele with findings, plots and flight path. Optionally embeds the original log. Hash-verified on open. See [Sharing analyses](docs/USAGE.md#sharing-analyses-ant). |
 | **Interfaces** | Desktop app (PySide6 + matplotlib), local web UI and API (FastAPI), CLI, and an HTML report. |
 
 ## Documentation
@@ -112,6 +114,7 @@ Limits: 100 MiB per file, 1,000,000 records, a 180 s analysis deadline and a sep
 
 - Read-only. No MAVLink link to an aircraft, no parameter writes, no flight commands.
 - Everything runs locally. Logs never leave your machine unless you choose to share them.
+- `.ant` files contain flight GPS positions even without the original log. Treat received `.ant` files as untrusted: AnaTele validates and hash-checks them and never executes their contents.
 - The web UI binds to `127.0.0.1` and has no login. See [DEPLOYMENT](docs/DEPLOYMENT.md) before exposing it.
 - The analysis worker is a separate process with time and size limits, but it is **not** a security sandbox.
 

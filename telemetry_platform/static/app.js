@@ -37,7 +37,9 @@ async function loadLog(id){
  }
  $("quality").textContent=result.status==="partial"?"Partial/salvaged dataset: some records or time relationships are uncertain. See diagnostics below.":"Decoded dataset. Coverage remains limited to recorded signals; no findings does not mean healthy.";
  $("profile-info").textContent=result.profile?`${result.profile.body.name}, profile v${result.profile.version} (operator-declared)`:"No attached profile";
- $("report-link").href=base()+"/report";$("original-link").href=base()+"/original";
+ $("report-link").href=base()+"/report";$("original-link").href=base()+"/original";$("original-link").hidden=!result.has_original;
+ $("ant-link").href=base()+"/export.ant";$("ant-original-link").href=base()+"/export.ant?include_original=true";$("ant-original-link").hidden=!result.has_original;
+ if(m.shared_from)$("profile-info").textContent+=` · shared analysis from ${m.shared_from.file}${m.shared_from.original_included?"":" (original log not included)"}`;
  $("source").replaceChildren();
  for(const s of m.sources){const option=element("option",`${s.key} — ${s.role} (${s.messages.toLocaleString()})`);option.value=s.key;$("source").append(option);}
  const vehicle=m.sources.find(s=>s.role==="vehicle")||m.sources[0];$("source").value=vehicle.key;
@@ -251,6 +253,10 @@ function drawPlot(canvas,points,isMap){
 function drawPlots(){drawPlot($("chart"),signalPoints,false);drawPlot($("map"),positionPoints,true);}
 $("upload-form").addEventListener("submit",run(async event=>{
  event.preventDefault();const file=$("file").files[0];if(!file)return;
+ if(file.name.toLowerCase().endsWith(".ant")){
+   const form=new FormData();form.append("file",file);
+   const response=await api("/api/analyses",{method:"POST",body:form});await loadLog(response.id);await refreshLogs();return;
+ }
  if(file.size>100*1024*1024)throw new Error("Local upload limit: 100 MiB");
  const form=new FormData();form.append("file",file);if($("profile").value)form.append("profile_id",$("profile").value);
  $("upload-button").disabled=true;$("upload-button").textContent="Uploading…";

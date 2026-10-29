@@ -35,7 +35,7 @@ anatele path/to/flight.tlog      # import and analyse immediately
 
 | Region | Contents |
 |---|---|
-| **Menu** | File (Open Log `Ctrl+O`, Export Report `Ctrl+E`, Show Original File), Analysis (Re-analyse with the selected profile, Refresh `F5`), Tools (Profile Editor, Compare With Log, Aircraft Trends), Help (Limitations). |
+| **Menu** | File (Open Log or Analysis `Ctrl+O`, Save Analysis As .ant `Ctrl+S`, Export Report `Ctrl+E`, Show Original File), Analysis (Re-analyse with the selected profile, Refresh `F5`), Tools (Profile Editor, Compare With Log, Aircraft Trends), Help (Limitations). |
 | **Left: Recordings** | Each imported file shows its status and progress. Analysis runs in a separate worker process, so the window stays responsive. Failed files show the error. |
 | **Left: Profile** | The profile you select is attached to the *next* import (or re-analysis). Profiles are immutable and versioned. |
 | **Left: Episodes** | One row per armed episode, showing the phase status (`airborne reported`, `airborne inferred`, `no airborne evidence`, `unassessable`), takeoff time and crash-report time. Selecting an episode zooms the plots and replay to it. *All* shows the whole recording. |
@@ -84,7 +84,8 @@ anatele path/to/flight.tlog      # import and analyse immediately
 ```text
 anatele                         desktop app
 anatele web [--port 8766]       web UI on 127.0.0.1
-anatele analyse LOG [--json]    findings, hypotheses and rule summary in the terminal
+anatele analyse LOG [--json]    findings, hypotheses and rule summary in the terminal (LOG may be a .ant)
+anatele export LOG [-o F.ant] [--include-original]   analyse and save a shareable .ant
 anatele replay LOG [--out x.gif|x.png] [--episode N] [--fps 12] [--seconds 12]
 anatele simulate [--scenario NAME|all] [--out DIR|file.tlog] [--seed N] [--duration S]
 ```
@@ -150,6 +151,7 @@ The web UI has the same analysis with a simpler layout. OpenAPI docs are at `/do
 
 ```text
 POST /api/logs                              multipart file (+ profile_id)
+POST /api/analyses                          multipart .ant file (opens a shared analysis)
 GET  /api/logs | /api/logs/{id}
 GET  /api/logs/{id}/events?search=&severity=&collapse=
 GET  /api/logs/{id}/rules?state=triggered
@@ -160,6 +162,7 @@ GET  /api/logs/{id}/positions?source=1:1
 GET  /api/logs/{id}/records/{record_id}     decoded record + raw bytes
 GET  /api/logs/{id}/report                  printable HTML
 GET  /api/logs/{id}/original
+GET  /api/logs/{id}/export.ant?include_original=false
 GET  /api/compare?left=ID&right=ID
 GET  /api/drones/{drone_key}/trends
 POST /api/profiles | GET /api/profiles
@@ -170,6 +173,42 @@ POST /api/profiles | GET /api/profiles
 **File → Export Report** (or `/api/logs/{id}/report`) writes a self-contained HTML file with the file hash,
 engine/rule/semantic versions, phases, ranked hypotheses, findings with evidence ids, the full rule-coverage
 table, mission item statuses and limitations. Print it to PDF from a browser.
+
+## Sharing analyses (.ant)
+
+An **`.ant`** file (*ANalysed Telemetry*) is a finished AnaTele analysis that someone else can open without
+re-running anything: findings, ranked hypotheses, rule coverage, phases, missions, flight statistics, every
+plot and the 3D flight path.
+
+| How | Save | Open |
+|---|---|---|
+| Desktop | **File → Save Analysis As (.ant)** `Ctrl+S` | **File → Open** `Ctrl+O`, or `anatele shared.ant` |
+| Web | *Save analysis (.ant)* link above the results | Choose the `.ant` in the upload box |
+| CLI | `anatele export LOG -o flight.ant` | `anatele analyse flight.ant` |
+
+When saving you choose:
+
+- **Analysis only** (default): smaller. The recipient sees decoded records but not raw bytes, and cannot re-analyse.
+- **Include original log**: embeds the untouched log so the recipient can view raw bytes and re-analyse with a newer engine or their own profile.
+
+Both contain **GPS positions and timestamps** of the flight. Share only with people you trust.
+
+**What's inside.** An `.ant` is a ZIP container (like `.docx`), so `unzip -l flight.ant` works:
+
+| Entry | Contents |
+|---|---|
+| `mimetype` | `application/vnd.anatele.analysis+zip` (first, uncompressed) |
+| `meta.json` | Format version, AnaTele/engine/rule-pack versions, original filename/size/SHA-256, profile snapshot, SHA-256 of every entry |
+| `manifest.json` | The full analysis result |
+| `observations.parquet`, `signals.parquet` | Decoded records and normalised signals |
+| `report.html` | The printable report, readable without AnaTele |
+| `original.tlog` / `.bin` / `.log` / `.csv` | Only with *Include original log* |
+
+**Safety.** Opening an `.ant` never runs analysis or code from the file. AnaTele accepts only the entries above,
+caps sizes while extracting (1 GiB file, 768 MiB per Parquet, 100 MiB original), rejects encrypted entries, and
+verifies every SHA-256 and the Parquet schema before registering it. Altered or damaged files are refused.
+Hashes prove the content is internally consistent, not who made it. An imported analysis shows *shared analysis
+from …* in the report and status line, and keeps the engine version it was produced with.
 
 ## Investigating a crash: a worked example
 

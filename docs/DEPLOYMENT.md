@@ -113,7 +113,9 @@ anatele.example.org {
 | Docker | `/data` volume |
 
 Contents: `platform.db` (SQLite: profiles, jobs, manifests), `uploads/` (original files, never modified),
-`datasets/<job>/` (observations and signals Parquet), `worker_logs/` (parser output and tracebacks).
+`datasets/<job>/` (observations and signals Parquet), `worker_logs/` (parser output and tracebacks),
+`exports/` (temporary files while the web UI streams or receives a `.ant`; removed afterwards).
+Opened `.ant` files become ordinary entries in `datasets/`, plus `uploads/` when the original log was included.
 The desktop app and web UI can share one directory, but only one web server per directory can run at a time.
 
 Back up by copying the directory while AnaTele is stopped. Nothing is deleted automatically; remove `uploads/` and
@@ -124,6 +126,7 @@ Back up by copying the directory while AnaTele is stopped. Nothing is deleted au
 | Limit | Value | Where |
 |---|---|---|
 | Upload size | 100 MiB | `store.MAX_UPLOAD` |
+| `.ant` file / per Parquet entry | 1 GiB / 768 MiB | `antfile.MAX_ANT`, `antfile.LIMITS` |
 | Decoded records | 1,000,000 | `parsers.MAX_RECORDS` |
 | Analysis deadline | 180 s | `worker.TIMEOUT_SECONDS` |
 | Events per log | 20,000 | `analysis.Analysis.event` |

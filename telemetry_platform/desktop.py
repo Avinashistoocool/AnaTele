@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
     QSlider, QTableWidget, QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget,
 )
 
-from . import compare as comparison, replay, store
+from . import antfile, compare as comparison, replay, store
 from .desktop_import import import_file
 from .worker import TIMEOUT_SECONDS
 
@@ -316,7 +316,8 @@ class MainWindow(QMainWindow):
     def build_menu(self):
         bar = self.menuBar()
         file_menu = bar.addMenu("File")
-        self.add_action(file_menu, "Open Log…", self.open_log, "Ctrl+O")
+        self.add_action(file_menu, "Open Log or Analysis…", self.open_log, "Ctrl+O")
+        self.add_action(file_menu, "Save Analysis As (.ant)…", self.save_ant, "Ctrl+S")
         self.add_action(file_menu, "Export Report…", self.export_report, "Ctrl+E")
         self.add_action(file_menu, "Show Original File", self.show_original)
         file_menu.addSeparator()
@@ -565,21 +566,66 @@ class MainWindow(QMainWindow):
                 return
 
     def open_log(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Open flight log", str(Path.home() / "Downloads"),
-                                              "Flight logs (*.tlog *.bin *.log *.csv)")
-        if not path:
-            return
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Open flight log or analysis", str(Path.home() / "Downloads"),
+            "Logs and analyses (*.tlog *.bin *.log *.csv *.ant);;Flight logs (*.tlog *.bin *.log *.csv);;"
+            "AnaTele analysis (*.ant)")
+        if path:
+            self.open_path(path)
+
+    def open_path(self, path):
         try:
-            job_id = import_file(path, self.profile.currentData())
+            if Path(path).suffix.lower() == ".ant":
+                job_id = antfile.import_ant(path)
+                self.status.setText(f"Opened shared analysis {Path(path).name}")
+            else:
+                job_id = import_file(path, self.profile.currentData())
+                self.status.setText(f"Queued {Path(path).name}")
         except (OSError, ValueError) as error:
-            QMessageBox.warning(self, "Cannot open log", str(error))
+            QMessageBox.warning(self, "Cannot open file", str(error))
             return
-        self.status.setText(f"Queued {Path(path).name}")
         self.refresh_logs()
         self.select_job(job_id)
 
+    def save_ant(self):
+        if not self.job or not self.job.get("manifest"):
+            QMessageBox.information(self, "Save analysis", "Select a finished analysis first.")
+            return
+        include = False
+        if store.has_original(self.job):
+            box = QMessageBox(self)
+            box.setWindowTitle("Save analysis (.ant)")
+            box.setText("Include the original flight log in the .ant file?")
+            box.setInformativeText(
+                "Without it, the recipient sees all findings, hypotheses, plots and the flight path, "
+                "but not raw record bytes, and cannot re-analyse.\n\n"
+                "Both versions contain GPS positions and timestamps of the flight. Share only with people you trust.")
+            without = box.addButton("Analysis only", QMessageBox.AcceptRole)
+            with_original = box.addButton("Include original log", QMessageBox.AcceptRole)
+            box.addButton(QMessageBox.Cancel)
+            box.setDefaultButton(without)
+            box.exec()
+            if box.clickedButton() not in (without, with_original):
+                return
+            include = box.clickedButton() is with_original
+        path, _ = QFileDialog.getSaveFileName(self, "Save analysis", str(Path.home() / f"{Path(self.job['filename']).stem}.ant"),
+                                              "AnaTele analysis (*.ant)")
+        if not path:
+            return
+        if not path.lower().endswith(".ant"):
+            path += ".ant"
+        try:
+            antfile.export_ant(self.job["id"], path, include)
+        except (OSError, ValueError) as error:
+            QMessageBox.warning(self, "Cannot save analysis", str(error))
+            return
+        self.status.setText(f"Saved {Path(path).name} ({Path(path).stat().st_size / 1048576:.1f} MiB)")
+
     def reanalyse(self):
         if not self.job:
+            return
+        if not store.has_original(self.job):
+            QMessageBox.information(self, "Re-analyse", "This shared analysis does not include the original log.")
             return
         job_id = import_file(self.job["path"], self.profile.currentData())
         # Keep the original filename for display.
@@ -894,7 +940,8 @@ class MainWindow(QMainWindow):
         if all_ids and len(all_ids) > 1:
             header += f"Evidence set ({len(all_ids)}): " + ", ".join(f"#{i}" for i in all_ids[:40]) + "\n"
         self.evidence.setPlainText(header + "\n" + json.dumps(record["payload"], indent=2) +
-                                   ("\n\nRaw bytes:\n" + record["raw_hex_preview"] if record.get("raw_hex_preview") else ""))
+                                   ("\n\nRaw bytes:\n" + record["raw_hex_preview"] if record.get("raw_hex_preview") else "") +
+                                   ("\n\n" + record["raw_note"] if record.get("raw_note") else ""))
         self.tabs.setCurrentWidget(self.evidence)
         if record["source"] == self.source.currentData():
             self.cursor_record = record["t_us"]
@@ -912,7 +959,9 @@ class MainWindow(QMainWindow):
             QDesktopServices.openUrl(QUrl.fromLocalFile(path))
 
     def show_original(self):
-        if self.job:
+        if self.job and not store.has_original(self.job):
+            QMessageBox.information(self, "Original file", "This shared analysis does not include the original log.")
+        elif self.job:
             QDesktopServices.openUrl(QUrl.fromLocalFile(str(Path(self.job["path"]).parent)))
 
     def edit_profile(self):
@@ -1000,8 +1049,7 @@ def main():
     window.show()
     for argument in sys.argv[1:]:
         if Path(argument).is_file():
-            window.select_job(import_file(argument))
-            window.refresh_logs()
+            window.open_path(argument)
     return app.exec()
 
 

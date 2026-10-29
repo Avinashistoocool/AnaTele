@@ -125,6 +125,20 @@ def enqueue(job_id, filename, kind, size, digest, path, profile_id):
         )
 
 
+def insert_imported(job_id, filename, kind, size, digest, path, status, manifest):
+    now = utc_now()
+    with connection() as db, db:
+        db.execute(
+            "INSERT INTO jobs(id,filename,format,size,sha256,path,profile_id,status,progress,created_at,"
+            "started_at,finished_at,manifest) VALUES(?,?,?,?,?,?,NULL,?,100,?,?,?,?)",
+            (job_id, filename, kind, size, digest, str(path), status, now, now, now, json.dumps(manifest)),
+        )
+
+
+def has_original(job):
+    return bool(job.get("path")) and Path(job["path"]).is_file()
+
+
 def claim():
     with connection() as db:
         db.execute("BEGIN IMMEDIATE")

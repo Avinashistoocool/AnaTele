@@ -16,9 +16,10 @@ from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFi
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+from starlette.background import BackgroundTask
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from . import compare as comparison, store
+from . import antfile, compare as comparison, store
 from .analysis import ENGINE_VERSION
 from .worker import loop
 
@@ -162,6 +163,7 @@ async def upload(file: UploadFile = File(...), profile_id: str | None = Form(def
 @app.get("/api/logs/{job_id}")
 def detail(job_id: str):
     job = job_or_404(job_id)
+    job["has_original"] = store.has_original(job)
     job.pop("path")
     if job["manifest"]:
         manifest = job["manifest"]
@@ -255,7 +257,10 @@ def evidence(job_id: str, record_id: int):
     record["payload"] = json.loads(record.pop("payload_json"))
     record["locator_kind"] = "csv_line" if job["format"] == "csv" else "byte_range"
     record["artifact_sha256"] = job["sha256"]
-    if record["length"]:
+    if record["length"] and not store.has_original(job):
+        record["raw_hex_preview"] = None
+        record["raw_note"] = "Original log not included in the shared .ant file; raw bytes unavailable."
+    elif record["length"]:
         with Path(job["path"]).open("rb") as stream:
             stream.seek(record["offset"])
             record["raw_hex_preview"] = stream.read(min(record["length"], 300)).hex(" ")
@@ -310,11 +315,54 @@ def positions(job_id: str, source: str, limit: int = Query(2000, ge=20, le=4000)
 @app.get("/api/logs/{job_id}/original")
 def original(job_id: str):
     job = job_or_404(job_id)
+    if not store.has_original(job):
+        raise HTTPException(404, "Original log not included in this shared analysis")
     return FileResponse(job["path"], media_type="application/octet-stream", filename=job["filename"])
+
+
+@app.get("/api/logs/{job_id}/export.ant")
+def export_analysis(job_id: str, include_original: bool = False):
+    job = ready(job_id)
+    folder = store.DATA / "exports"
+    folder.mkdir(exist_ok=True)
+    target = folder / f"{uuid.uuid4()}.ant"
+    try:
+        antfile.export_ant(job_id, target, include_original)
+    except antfile.AntError as error:
+        target.unlink(missing_ok=True)
+        raise HTTPException(409, str(error))
+    name = antfile.safe_filename(Path(job["filename"]).stem + ".ant")
+    return FileResponse(target, media_type=antfile.MIMETYPE, filename=name,
+                        background=BackgroundTask(target.unlink, missing_ok=True))
+
+
+@app.post("/api/analyses", status_code=201)
+async def import_analysis(file: UploadFile = File(...)):
+    if Path(file.filename or "").suffix.lower() != ".ant":
+        raise HTTPException(415, "Expected an AnaTele .ant analysis file")
+    folder = store.DATA / "exports"
+    folder.mkdir(exist_ok=True)
+    temp, size = folder / f"incoming-{uuid.uuid4()}.ant", 0
+    try:
+        with temp.open("xb") as stream:
+            while chunk := await file.read(1024 * 1024):
+                size += len(chunk)
+                if size > antfile.MAX_ANT:
+                    raise HTTPException(413, ".ant files larger than 1 GiB are not accepted")
+                stream.write(chunk)
+        try:
+            job_id = antfile.import_ant(temp)
+        except antfile.AntError as error:
+            raise HTTPException(400, str(error))
+    finally:
+        temp.unlink(missing_ok=True)
+        await file.close()
+    return {"id": job_id, "status": store.get_job(job_id)["status"]}
 
 
 @app.get("/api/logs/{job_id}/report", response_class=HTMLResponse)
 def report(job_id: str):
+    e = lambda value: html.escape(str(value))
     job = ready(job_id)
     manifest = job["manifest"]
     parts = [
@@ -323,13 +371,18 @@ def report(job_id: str):
         "article{border:1px solid #aaa;padding:15px;margin:15px 0}code{overflow-wrap:anywhere}</style>",
         "<h1>AnaTele investigation report</h1>",
         "<p>Automated observations and investigation hypotheses. Not a crash verdict or airworthiness approval.</p>",
-        f"<p>File: {html.escape(job['filename'])}<br>SHA-256: <code>{job['sha256']}</code><br>"
-        f"Analysis engine: {manifest['version']}<br>Status: {job['status']}</p>",
+        f"<p>File: {e(job['filename'])}<br>SHA-256: <code>{e(job['sha256'])}</code><br>"
+        f"Analysis engine: {e(manifest['version'])}<br>Status: {e(job['status'])}</p>",
     ]
+    shared = manifest.get("shared_from")
+    if shared:
+        parts.append(f"<p>Opened from shared analysis {e(shared.get('file'))} (created {e(shared.get('created_at'))} "
+                     f"by {e(shared.get('created_by'))}; original log "
+                     f"{'included' if shared.get('original_included') else 'not included'}).</p>")
     pack = manifest.get("rule_pack")
     if pack:
-        parts.append(f"<p>Rule pack: {html.escape(pack['pack'])} v{pack['version']} "
-                     f"(<code>{pack['sha256'][:16]}</code>)</p>")
+        parts.append(f"<p>Rule pack: {e(pack['pack'])} v{e(pack['version'])} "
+                     f"(<code>{e(str(pack['sha256'])[:16])}</code>)</p>")
     for source in manifest["sources"]:
         if source.get("semantic_pack"):
             parts.append(f"<p>Source {html.escape(source['key'])}: semantics {html.escape(source['semantic_pack'])} — "
@@ -339,14 +392,14 @@ def report(job_id: str):
         parts.append("<h2>Armed episodes and flight phases</h2><ul>")
         for index, phase in enumerate(manifest["phases"]):
             rel = lambda key: f"{(phase[key] - t0) / 1e6:.1f} s" if phase.get(key) else "—"
-            parts.append(f"<li>Episode {index}: {html.escape(phase['status'])} ({html.escape(phase['method'] or 'n/a')}); "
+            parts.append(f"<li>Episode {index}: {e(phase['status'])} ({e(phase['method'] or 'n/a')}); "
                          f"armed {rel('armed_us')}, takeoff {rel('takeoff_us')}, pre-event end {rel('pre_event_end_us')}, "
                          f"crash report {rel('critical_event_us')}, disarmed {rel('disarmed_us')}. "
-                         f"{html.escape(' '.join(phase['notes']))}</li>")
+                         f"{e(' '.join(map(str, phase['notes'])))}</li>")
         parts.append("</ul><p>Times are relative to the first record.</p>")
     for incident in manifest.get("incidents", []):
-        parts.append(f"<h2>Investigation hypotheses — episode {incident['episode']}</h2>"
-                     f"<p>{html.escape(incident['method'])}</p><ol>")
+        parts.append(f"<h2>Investigation hypotheses — episode {e(incident['episode'])}</h2>"
+                     f"<p>{e(incident['method'])}</p><ol>")
         for h in incident["hypotheses"]:
             parts.append(f"<li><strong>{html.escape(h['title'])}</strong>: {html.escape(h['label'])}. "
                          f"Support: {html.escape(', '.join(s['title'] for s in h['support']) or 'none')}. "
@@ -356,9 +409,9 @@ def report(job_id: str):
     parts.append("<h2>Findings</h2>")
     for finding in manifest["findings"]:
         parts.append(f"<article><h3>{html.escape(finding['title'])}</h3><p>{html.escape(finding['detail'])}</p>"
-                     f"<p>Type: {finding['kind']} | Severity: {finding['severity']} | Source: {html.escape(finding['source'])}</p>")
+                     f"<p>Type: {e(finding['kind'])} | Severity: {e(finding['severity'])} | Source: {e(finding['source'])}</p>")
         parts.append("<p>Evidence records: " + ", ".join(
-            f"<a href='/api/logs/{job_id}/records/{number}'>{number}</a>" for number in finding["evidence"]) + "</p>")
+            f"<a href='/api/logs/{e(job_id)}/records/{int(number)}'>{int(number)}</a>" for number in finding["evidence"]) + "</p>")
         parts.append("<p>Missing: " + html.escape(", ".join(finding["missing"]) or "No additional requirements specified") + "</p></article>")
     if not manifest["findings"]:
         parts.append("<p>No supported rule triggered. This does not mean that the aircraft is healthy.</p>")
@@ -370,16 +423,16 @@ def report(job_id: str):
         for r in results:
             scope = r["scope"]
             label = scope.get("type", "") + " " + str(scope.get("episode", scope.get("signal", scope.get("source", ""))))
-            parts.append(f"<tr><td>{html.escape(r['rule_id'])} v{r['rule_version']}</td><td>{html.escape(label)}</td>"
+            parts.append(f"<tr><td>{e(r['rule_id'])} v{e(r['rule_version'])}</td><td>{html.escape(label)}</td>"
                          f"<td>{html.escape(r['state'])}</td></tr>")
         parts.append("</table>")
     for entry in manifest["missions"].get("execution", []):
         if not entry["items"]:
             continue
-        parts.append(f"<h2>Mission items — episode {entry['episode']} (plan version {entry['plan_version']}, "
+        parts.append(f"<h2>Mission items — episode {e(entry['episode'])} (plan version {e(entry['plan_version'])}, "
                      f"{html.escape(entry.get('plan_confidence') or '')})</h2><ul>")
         for item in entry["items"]:
-            parts.append(f"<li>Item {item['seq']} {html.escape(item['command'])}: {html.escape(item['status'])}. "
+            parts.append(f"<li>Item {e(item['seq'])} {e(item['command'])}: {e(item['status'])}. "
                          f"{html.escape(item.get('note') or '')}</li>")
         parts.append("</ul>")
     parts.append("<h2>Limitations</h2><ul>" + "".join("<li>" + html.escape(item) + "</li>" for item in manifest["limitations"]) + "</ul>")
