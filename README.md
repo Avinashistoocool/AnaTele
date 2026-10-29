@@ -1,6 +1,10 @@
-﻿<p align="center"><img src="docs/images/anatele_concept2_logo_sheet.svg" width="720" alt="AnaTele logo"></p>
+﻿<p align="center"><img src="docs/images/anatele_github_readme_cover.svg" width="100%" alt="AnaTele: evidence-first drone flight-log investigation"></p>
 
-# AnaTele
+<p align="center">
+  <a href="https://github.com/Avinashistoocool/AnaTele/actions/workflows/ci.yml"><img src="https://github.com/Avinashistoocool/AnaTele/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/Avinashistoocool/AnaTele/releases/latest"><img src="https://img.shields.io/github/v/release/Avinashistoocool/AnaTele" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
+</p>
 
 **Evidence-first drone flight-log investigation.** AnaTele reads ArduPilot logs (Mission Planner `.tlog`,
 DataFlash `.bin`/`.log`) and turns them into a reproducible investigation:
