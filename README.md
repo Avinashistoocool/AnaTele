@@ -27,7 +27,20 @@ feature without a real log.
 
 ---
 
-## Quick start
+## Download
+
+No Python needed. Grab the build for your OS from the [latest release](https://github.com/Avinashistoocool/AnaTele/releases/latest):
+
+| OS | Download | Run |
+|---|---|---|
+| Windows 10/11 | [AnaTele-windows.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-windows.zip) | Extract ? `AnaTele.exe` (SmartScreen: *More info ? Run anyway*) |
+| macOS | [AnaTele-macos.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-macos.zip) | Extract ? right-click `AnaTele` ? *Open* |
+| Linux | [AnaTele-linux.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-linux.zip) | Extract ? `./AnaTele/AnaTele` |
+
+Each zip includes five simulated flights in `simulations/`. Open `sim_motor_failure.tlog` to try it.
+The builds are unsigned, so your OS may warn you the first time you run them.
+
+## Quick start (from source)
 
 ```bash
 git clone https://github.com/Avinashistoocool/AnaTele.git
