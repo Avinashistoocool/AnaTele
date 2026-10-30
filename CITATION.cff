@@ -1,4 +1,4 @@
-﻿cff-version: 1.2.0
+cff-version: 1.2.0
 message: "If you use AnaTele in research or a report, please cite it as below."
 title: "AnaTele: evidence-first investigation of ArduPilot flight logs"
 type: software
