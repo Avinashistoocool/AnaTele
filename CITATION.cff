@@ -3,7 +3,8 @@ message: "If you use AnaTele in research or a report, please cite it as below."
 title: "AnaTele: evidence-first investigation of ArduPilot flight logs"
 type: software
 authors:
-  - given-names: Avinash
+  - given-names: Avinash Chandra
+    family-names: Gupta
     alias: Avinashistoocool
 version: 0.4.1
 date-released: 2026-10-30
