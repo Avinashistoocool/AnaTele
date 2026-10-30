@@ -6,6 +6,7 @@
 - [Flight simulator](#flight-simulator)
 - [Aircraft profiles](#aircraft-profiles)
 - [Web UI and HTTP API](#web-ui-and-http-api)
+- [Sharing analyses (.ant)](#sharing-analyses-ant)
 - [Reports](#reports)
 - [Investigating a crash: a worked example](#investigating-a-crash-a-worked-example)
 - [Tips and troubleshooting](#tips-and-troubleshooting)

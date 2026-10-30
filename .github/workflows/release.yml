@@ -81,6 +81,14 @@ jobs:
         with:
           path: assets
           merge-multiple: true
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          persist-credentials: false
+          path: src
+          sparse-checkout: docs/AnaTele_Technical_Report.pdf
+          sparse-checkout-cone-mode: false
+      - name: Add technical report
+        run: cp src/docs/AnaTele_Technical_Report.pdf assets/
       - name: Checksums
         working-directory: assets
         run: sha256sum * | tee SHA256SUMS.txt

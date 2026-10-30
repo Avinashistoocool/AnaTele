@@ -1,4 +1,4 @@
-﻿<p align="center"><img src="docs/images/anatele_github_readme_cover.svg" width="100%" alt="AnaTele: evidence-first drone flight-log investigation"></p>
+<p align="center"><img src="docs/images/anatele_github_readme_cover.svg" width="100%" alt="AnaTele: evidence-first drone flight-log investigation"></p>
 
 <p align="center">
   <a href="https://github.com/Avinashistoocool/AnaTele/actions/workflows/ci.yml"><img src="https://github.com/Avinashistoocool/AnaTele/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
@@ -33,9 +33,9 @@ No Python needed. Grab the build for your OS from the [latest release](https://g
 
 | OS | Download | Run |
 |---|---|---|
-| Windows 10/11 | [AnaTele-windows.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-windows.zip) | Extract ? `AnaTele.exe` (SmartScreen: *More info ? Run anyway*) |
-| macOS | [AnaTele-macos.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-macos.zip) | Extract ? right-click `AnaTele` ? *Open* |
-| Linux | [AnaTele-linux.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-linux.zip) | Extract ? `./AnaTele/AnaTele` |
+| Windows 10/11 | [AnaTele-windows.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-windows.zip) | Extract → `AnaTele.exe` (SmartScreen: *More info → Run anyway*) |
+| macOS | [AnaTele-macos.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-macos.zip) | Extract → right-click `AnaTele` → *Open* |
+| Linux | [AnaTele-linux.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-linux.zip) | Extract → `./AnaTele/AnaTele` |
 
 Each zip includes five simulated flights in `simulations/`. Open `sim_motor_failure.tlog` to try it.
 The builds are not code-signed, so your OS may warn you the first time you run them. To check that a download is genuine:
@@ -87,6 +87,9 @@ anatele export  simulations/sim_motor_failure.tlog -o motor_failure.ant   # shar
 
 ## Documentation
 
+Browse everything at **[avinashistoocool.github.io/AnaTele](https://avinashistoocool.github.io/AnaTele/)**.
+
+- [**Technical report (PDF)**](docs/AnaTele_Technical_Report.pdf): the architecture and all of the mathematics, including framing, clock epochs, phase inference, tilt error, mixer decomposition, the rule detectors, hypothesis scoring, waypoint geometry, the simulator physics and the `.ant` integrity model. The LaTeX source is in [`docs/AnaTele_Technical_Report.tex`](docs/AnaTele_Technical_Report.tex).
 - [**Usage guide**](docs/USAGE.md): desktop app walkthrough, CLI, web UI, API, profiles and the simulator.
 - [**Diagnostics reference**](docs/DIAGNOSTICS.md): every rule, the hypothesis ranking, flight phases, mission statuses and how to read *unassessable*.
 - [**Deployment**](docs/DEPLOYMENT.md): pip install, standalone desktop builds, Docker, data directories and security.
@@ -131,6 +134,11 @@ pyflakes telemetry_platform
 
 Contributions are welcome, especially rules (with tests), semantic packs for other firmware versions and
 anonymised real logs with known outcomes.
+
+## Citing
+
+If AnaTele helps your research or competition report, cite it using GitHub's **Cite this repository** button
+(from [`CITATION.cff`](CITATION.cff)).
 
 ## License
 

@@ -1,0 +1,45 @@
+site_name: AnaTele
+site_description: Evidence-first investigation of ArduPilot drone flight logs
+site_url: https://avinashistoocool.github.io/AnaTele/
+repo_url: https://github.com/Avinashistoocool/AnaTele
+repo_name: Avinashistoocool/AnaTele
+edit_uri: edit/main/docs/
+docs_dir: docs
+strict: true
+exclude_docs: |
+  *.tex
+
+theme:
+  name: material
+  logo: images/anatele_concept2_icon.svg
+  favicon: images/anatele_concept2_icon.svg
+  palette:
+    - scheme: slate
+      primary: deep orange
+      accent: deep orange
+      toggle: {icon: material/brightness-4, name: Light mode}
+    - scheme: default
+      primary: deep orange
+      accent: deep orange
+      toggle: {icon: material/brightness-7, name: Dark mode}
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Usage guide: USAGE.md
+  - Diagnostics reference: DIAGNOSTICS.md
+  - Deployment: DEPLOYMENT.md
+  - Design: DESIGN.md
+  - Technical report (PDF): AnaTele_Technical_Report.pdf
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc: {permalink: true}
+  - pymdownx.superfences
+  - pymdownx.highlight

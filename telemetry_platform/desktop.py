@@ -188,8 +188,8 @@ class FlightPathPanel(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.canvas, 1)
         layout.addLayout(controls)
-        legend = QLabel("Path colour = flight mode ? waypoint colour: green reported complete, yellow-green near (within "
-                        "radius + GPS accuracy), amber completion not observed, red not visited ? X = takeoff / excursion / "
+        legend = QLabel("Path colour = flight mode · waypoint colour: green reported complete, yellow-green near (within "
+                        "radius + GPS accuracy), amber completion not observed, red not visited · X = takeoff / excursion / "
                         "crash report. Estimated positions relative to the first armed fix; not ground truth.")
         legend.setWordWrap(True)
         legend.setStyleSheet("color:#909090")
@@ -218,8 +218,8 @@ class FlightPathPanel(QWidget):
             replay.draw(self.ax, self.track, None if full else value)
             self.ax.view_init(elev=elev, azim=azim)
             up = self.track.up[value]
-            self.label.setText(f"t+{(self.track.t[value] - self.track.t[0]) / 1e6:6.1f} s ? {self.track.mode[value]} ? "
-                               f"alt {up:5.1f} m ? roll {self.track.roll[value]:5.1f}? pitch {self.track.pitch[value]:5.1f}?")
+            self.label.setText(f"t+{(self.track.t[value] - self.track.t[0]) / 1e6:6.1f} s · {self.track.mode[value]} · "
+                               f"alt {up:5.1f} m · roll {self.track.roll[value]:5.1f}° pitch {self.track.pitch[value]:5.1f}°")
         self.canvas.draw_idle()
 
     def toggle(self):

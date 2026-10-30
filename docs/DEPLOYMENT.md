@@ -11,7 +11,7 @@ AnaTele can be used in four ways:
 
 ## Standalone desktop build
 
-Each `v*` tag triggers [`release.yml`](../.github/workflows/release.yml). It builds a one-folder PyInstaller bundle for
+Each `v*` tag triggers [`release.yml`](https://github.com/Avinashistoocool/AnaTele/blob/main/.github/workflows/release.yml). It builds a one-folder PyInstaller bundle for
 Windows, macOS and Linux and attaches it to the GitHub release together with the wheel and five simulated flights.
 
 1. Download `AnaTele-<os>.zip` and extract it.
@@ -135,7 +135,7 @@ Back up by copying the directory while AnaTele is stopped. Nothing is deleted au
 
 ## Continuous integration
 
-[`ci.yml`](../.github/workflows/ci.yml) runs pyflakes and the full test suite (including the offscreen desktop smoke
+[`ci.yml`](https://github.com/Avinashistoocool/AnaTele/blob/main/.github/workflows/ci.yml) runs pyflakes and the full test suite (including the offscreen desktop smoke
 test) on Ubuntu and Windows with Python 3.11 and 3.13. It also builds the Docker image and checks its health endpoint.
 
 ## Releasing

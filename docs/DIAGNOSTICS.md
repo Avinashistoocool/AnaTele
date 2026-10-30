@@ -68,7 +68,7 @@ All thresholds are recorded in each phase's `config`. They are analysis choices,
 
 ## Rule catalogue
 
-Rules live in [`telemetry_platform/rules/core.yaml`](../telemetry_platform/rules/core.yaml) (pack `core`, version 2).
+Rules live in [`telemetry_platform/rules/core.yaml`](https://github.com/Avinashistoocool/AnaTele/blob/main/telemetry_platform/rules/core.yaml) (pack `core`, version 2).
 Scopes: *event* (one result per anchor event), *source*, *episode* (per armed episode), *series*, *snapshot* (parameter set).
 
 | Rule id | Scope | Detector | Triggers when |

@@ -1,0 +1,27 @@
+﻿cff-version: 1.2.0
+message: "If you use AnaTele in research or a report, please cite it as below."
+title: "AnaTele: evidence-first investigation of ArduPilot flight logs"
+type: software
+authors:
+  - given-names: Avinash
+    alias: Avinashistoocool
+version: 0.4.1
+date-released: 2026-10-30
+license: MIT
+repository-code: "https://github.com/Avinashistoocool/AnaTele"
+url: "https://avinashistoocool.github.io/AnaTele/"
+abstract: >-
+  AnaTele is an open-source desktop tool for investigating ArduPilot flight logs (.tlog, .bin, .log).
+  It infers flight phases, replays the recorded path in 3D, evaluates a versioned declarative rule pack
+  with four explicit result states, and ranks competing failure hypotheses by capped, evidence-family
+  support minus contradictions, without assigning probabilities. Every finding links to the exact log
+  record. It includes a fault-injection quadcopter simulator and a hash-verified shareable analysis
+  format (.ant).
+keywords:
+  - ArduPilot
+  - MAVLink
+  - drone
+  - UAV
+  - flight log analysis
+  - crash investigation
+  - telemetry

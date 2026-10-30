@@ -10,3 +10,5 @@ HANDOFF.md
 *.real.tlog
 simulations/
 *.local.md
+
+site/
