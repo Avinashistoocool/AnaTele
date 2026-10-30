@@ -7,6 +7,8 @@ datas = [(f"telemetry_platform/{folder}", f"telemetry_platform/{folder}") for fo
 datas += collect_data_files("pymavlink", includes=["dialects/v20/*.xml", "dialects/v10/*.xml"])
 hidden = collect_submodules("pymavlink.dialects") + collect_submodules("uvicorn") + [
     "telemetry_platform.analysis", "telemetry_platform.worker", "telemetry_platform.server",
+    "telemetry_platform.preflight.gui", "telemetry_platform.preflight.steps", "telemetry_platform.preflight.fake",
+    "telemetry_platform.preflight.report", "serial",
     "mpl_toolkits.mplot3d", "matplotlib.backends.backend_qtagg",
 ]
 

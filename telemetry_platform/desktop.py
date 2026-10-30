@@ -1,6 +1,8 @@
 """AnaTele desktop application (PySide6 + matplotlib), sharing the analysis engine and data directory.
 
-Read-only: no MAVLink connection, parameter writes or flight commands.
+Read-only: no MAVLink connection, parameter writes or flight commands. The separate AnaTele Preflight tool
+(Tools > Preflight checklist, telemetry_platform/preflight) is the only part that talks to a live vehicle and
+runs in its own process.
 """
 import json
 import math
@@ -329,6 +331,8 @@ class MainWindow(QMainWindow):
         self.add_action(tools, "Profile Editor…", self.edit_profile)
         self.add_action(tools, "Compare With Log…", self.compare_dialog)
         self.add_action(tools, "Aircraft Trends…", self.trends_dialog)
+        tools.addSeparator()
+        self.add_action(tools, "Preflight checklist…", self.launch_preflight)
         help_menu = bar.addMenu("Help")
         self.add_action(help_menu, "Limitations", self.show_limitations)
         self.add_action(help_menu, "About", lambda: QMessageBox.about(
@@ -1032,11 +1036,30 @@ class MainWindow(QMainWindow):
         note.setWordWrap(True)
         self.result_dialog(f"Trends — {key} ({len(data['flights'])} flights)", [canvas, grid, note])
 
+    def launch_preflight(self):
+        """AnaTele Preflight talks to a live vehicle, so it runs as its own process, apart from this read-only app."""
+        answer = QMessageBox.question(
+            self, "Preflight checklist",
+            "AnaTele Preflight connects to a LIVE vehicle (USB or telemetry) and can run calibrations, which change "
+            "the vehicle's stored calibration. It opens in a separate window.\n\nContinue?")
+        if answer != QMessageBox.Yes:
+            return
+        command = preflight_command()
+        if not QProcess.startDetached(command[0], command[1:]):
+            QMessageBox.warning(self, "Preflight checklist", "Could not start: " + " ".join(command))
+
     def closeEvent(self, event):
         if self.process and self.process.state() != QProcess.NotRunning:
             self.process.kill()
             self.process.waitForFinished(5000)
         super().closeEvent(event)
+
+
+def preflight_command():
+    """Command line that opens AnaTele Preflight; a frozen build re-invokes its own executable."""
+    if getattr(sys, "frozen", False):
+        return [sys.executable, "preflight"]
+    return [sys.executable, "-m", "telemetry_platform.cli", "preflight"]
 
 
 def main():

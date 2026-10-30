@@ -92,9 +92,22 @@ Browse everything at **[avinashistoocool.github.io/AnaTele](https://avinashistoo
 - [**Learn AnaTele from scratch**](https://avinashistoocool.github.io/AnaTele/learn/) ([PDF](docs/AnaTele_Illustrated_Guide.pdf)): an illustrated course for complete beginners. It has 12 chapters, 32 figures drawn from real simulated flights, and interactive widgets. It covers drones, logs, flight phases, tilt error, motors, sensors, rules, hypotheses, missions, the simulator and `.ant` sharing. Regenerate the figures with `python docs/figures/make_guide_figures.py`.
 - [**Technical report (PDF)**](docs/AnaTele_Technical_Report.pdf): the architecture and all of the mathematics, including framing, clock epochs, phase inference, tilt error, mixer decomposition, the rule detectors, hypothesis scoring, waypoint geometry, the simulator physics and the `.ant` integrity model. The LaTeX source is in [`docs/AnaTele_Technical_Report.tex`](docs/AnaTele_Technical_Report.tex).
 - [**Usage guide**](docs/USAGE.md): desktop app walkthrough, CLI, web UI, API, profiles and the simulator.
+- [**Preflight checklist**](docs/PREFLIGHT.md): the separate AnaTele Preflight tool for a live vehicle.
 - [**Diagnostics reference**](docs/DIAGNOSTICS.md): every rule, the hypothesis ranking, flight phases, mission statuses and how to read *unassessable*.
 - [**Deployment**](docs/DEPLOYMENT.md): pip install, standalone desktop builds, Docker, data directories and security.
 - [**Design**](docs/DESIGN.md): the full architecture proposal and its reasoning.
+
+## AnaTele Preflight (live vehicle)
+
+AnaTele Preflight is a **separate tool**. It is the only part of AnaTele that connects to a live vehicle, over USB (`COM3`), telemetry radio, UDP (`udpin:0.0.0.0:14550`) or TCP. One button, **Run full preflight**, runs in order: gyro and barometer calibration, level calibration, guided compass calibration, guided 6-position accelerometer calibration, pre-arm health (sensors, EKF, GPS, battery, RC, `PreArm:` messages), a props-off motor test and a parameter-profile comparison. It pauses whenever you need to move the vehicle, and it writes a JSON and Markdown report.
+
+```bash
+anatele preflight                         # window (also: desktop app > Tools > Preflight checklist)
+anatele preflight --no-gui --connect COM3  # terminal
+anatele preflight --simulate               # try it without hardware
+```
+
+Calibrations change the vehicle's stored calibration. The vehicle is never armed, and the motor test only runs after an explicit props-removed confirmation. Read the [Preflight guide](docs/PREFLIGHT.md) before using it on a vehicle.
 
 ## Screenshots
 
@@ -116,7 +129,7 @@ Limits: 100 MiB per file, 1,000,000 records, a 180 s analysis deadline and a sep
 
 ## Safety and privacy
 
-- Read-only. No MAVLink link to an aircraft, no parameter writes, no flight commands.
+- The analyser is read-only: no MAVLink link to an aircraft, no parameter writes, no flight commands. The separate [Preflight](docs/PREFLIGHT.md) tool is the only part that talks to a vehicle. It runs calibrations and a props-off motor test, never arms the vehicle, and never writes other parameters.
 - Everything runs locally. Logs never leave your machine unless you choose to share them.
 - `.ant` files contain flight GPS positions even without the original log. Treat received `.ant` files as untrusted: AnaTele validates and hash-checks them and never executes their contents.
 - The web UI binds to `127.0.0.1` and has no login. See [DEPLOYMENT](docs/DEPLOYMENT.md) before exposing it.

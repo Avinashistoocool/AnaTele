@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anatele"
-version = "0.4.1"
+version = "0.5.0"
 description = "Evidence-first drone flight-log investigation: timelines, flight phases, rule-based diagnostics, mission reconstruction, 3D replay and a flight simulator for ArduPilot logs."
 readme = "README.md"
 license = "MIT"
@@ -23,6 +23,7 @@ dependencies = [
     "uvicorn>=0.30,<1",
     "python-multipart>=0.0.18,<1",
     "pymavlink>=2.4.49,<3",
+    "pyserial>=3.5,<4",
     "duckdb>=1.2,<2",
     "pyyaml>=6,<7",
     "matplotlib>=3.8,<4",
@@ -43,7 +44,7 @@ Homepage = "https://github.com/Avinashistoocool/AnaTele"
 Issues = "https://github.com/Avinashistoocool/AnaTele/issues"
 
 [tool.setuptools]
-packages = ["telemetry_platform"]
+packages = ["telemetry_platform", "telemetry_platform.preflight"]
 
 [tool.setuptools.package-data]
 telemetry_platform = ["static/*", "rules/*.yaml", "semantics/*.yaml"]

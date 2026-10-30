@@ -31,6 +31,7 @@ anatele simulations/sim_motor_failure.tlog
 |---|---|
 | [**Learn AnaTele from scratch**](learn/index.md) | Illustrated course, no background needed: 12 chapters, 32 figures, interactive widgets ([PDF](AnaTele_Illustrated_Guide.pdf)) |
 | [Usage guide](USAGE.md) | Desktop walkthrough, CLI, web UI, API, profiles, simulator, `.ant` sharing |
+| [Preflight checklist](PREFLIGHT.md) | Separate tool for a **live** vehicle: one-button gyro/baro/level/compass/accelerometer calibration, pre-arm health, props-off motor test, parameter profile check |
 | [Diagnostics reference](DIAGNOSTICS.md) | Every rule, hypothesis ranking, flight phases, mission statuses |
 | [Deployment](DEPLOYMENT.md) | Standalone builds, pip, Docker, data directories, security |
 | [Technical report (PDF)](AnaTele_Technical_Report.pdf) | Architecture and all of the mathematics, from framing to the simulator |

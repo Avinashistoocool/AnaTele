@@ -51,6 +51,7 @@ nav:
       - Interactive widgets: learn/widgets-demo.md
       - Illustrated guide (PDF): AnaTele_Illustrated_Guide.pdf
   - Usage guide: USAGE.md
+  - Preflight checklist: PREFLIGHT.md
   - Diagnostics reference: DIAGNOSTICS.md
   - Deployment: DEPLOYMENT.md
   - Design: DESIGN.md
