@@ -1,0 +1,202 @@
+/* AnaTele teaching widgets (docs/javascripts/learn.js). Uses Material theme variables for light/dark schemes. */
+.anatele-widget {
+  --anatele-accent: var(--md-accent-fg-color, #ff6e40);
+  --anatele-desired: var(--md-default-fg-color--light, #888);
+  --anatele-warn: #d84315;
+  --anatele-ok: #2e7d32;
+  --anatele-info: #1565c0;
+  margin: 1.2em 0;
+  padding: 0.9em 1em;
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  border-radius: 0.3rem;
+  background: var(--md-default-bg-color, transparent);
+  color: var(--md-default-fg-color);
+  font-size: 0.72rem;
+  max-width: 100%;
+  overflow-x: auto;
+}
+[data-md-color-scheme="slate"] .anatele-widget {
+  --anatele-warn: #ff8a65;
+  --anatele-ok: #81c784;
+  --anatele-info: #64b5f6;
+}
+.anatele-widget:not(.anatele-widget--ready)::before {
+  content: "Interactive widget (requires JavaScript).";
+  color: var(--md-default-fg-color--light);
+}
+.md-typeset .anatele-widget p { margin: 0.3em 0; }
+.md-typeset .anatele-widget .anatele-widget__title {
+  margin-top: 0;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.md-typeset .anatele-widget .anatele-widget__caption,
+.md-typeset .anatele-widget .anatele-widget__small,
+.md-typeset .anatele-widget .anatele-widget__legend {
+  color: var(--md-default-fg-color--light);
+}
+.md-typeset .anatele-widget .anatele-widget__small { font-size: 0.65rem; }
+.anatele-widget__body { margin-top: 0.6em; }
+
+.anatele-widget__split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+  align-items: flex-start;
+}
+.anatele-widget__split > .anatele-widget__controls { flex: 1 1 15rem; min-width: 0; }
+.anatele-widget__split > .anatele-widget__figure { flex: 0 1 15rem; min-width: 10rem; margin: 0 auto; }
+.anatele-widget__controls--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.3em 1.2em;
+  align-items: center;
+  margin-bottom: 0.6em;
+}
+
+.anatele-widget__control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4.2em;
+  grid-template-areas: "label value" "input input";
+  align-items: center;
+  margin: 0.35em 0;
+}
+.anatele-widget__control > label { grid-area: label; }
+.anatele-widget__control > input,
+.anatele-widget__control > select { grid-area: input; width: 100%; }
+.anatele-widget__control > output { grid-area: value; text-align: right; font-variant-numeric: tabular-nums; }
+.anatele-widget__control--select { grid-template-areas: "label label" "input input"; }
+.anatele-widget input[type="range"] { accent-color: var(--anatele-accent); margin: 0.2em 0; }
+.anatele-widget input[type="checkbox"] { accent-color: var(--anatele-accent); margin-right: 0.4em; }
+.anatele-widget select {
+  font: inherit;
+  color: var(--md-default-fg-color);
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 0.2rem;
+  padding: 0.15em 0.3em;
+  max-width: 100%;
+}
+.anatele-widget__check { display: flex; align-items: center; margin: 0.35em 0; }
+.anatele-widget input:focus-visible,
+.anatele-widget select:focus-visible,
+.anatele-widget button:focus-visible,
+.anatele-svg__handle:focus-visible {
+  outline: 2px solid var(--anatele-accent);
+  outline-offset: 2px;
+}
+.md-typeset .anatele-widget .anatele-widget__button {
+  font-size: 0.65rem;
+  padding: 0.3em 0.9em;
+  justify-self: start;
+  margin: 0;
+}
+.anatele-widget__readout {
+  margin-top: 0.6em;
+  padding-top: 0.4em;
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+  font-variant-numeric: tabular-nums;
+}
+
+.anatele-badge {
+  display: inline-block;
+  padding: 0 0.5em;
+  border-radius: 0.2rem;
+  border: 1px solid currentColor;
+  font-size: 0.65rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.anatele-badge--warn { color: var(--anatele-warn); }
+.anatele-badge--ok { color: var(--anatele-ok); }
+.anatele-badge--info { color: var(--anatele-info); }
+.anatele-badge--muted { color: var(--md-default-fg-color--light); }
+
+.anatele-key {
+  display: inline-block;
+  width: 1.2em;
+  height: 0.25em;
+  vertical-align: middle;
+  background: var(--anatele-desired);
+}
+.anatele-key--actual { background: var(--anatele-accent); }
+
+/* SVG */
+.anatele-svg { display: block; width: 100%; height: auto; max-width: 15rem; margin: 0 auto; overflow: visible; }
+.anatele-svg--wide { max-width: 100%; }
+.anatele-svg--map {
+  max-width: 20rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.2rem;
+  touch-action: none;
+}
+.anatele-svg text { fill: var(--md-default-fg-color--light); font-size: 10px; }
+.anatele-svg .anatele-svg__motor { fill: var(--md-default-fg-color); font-size: 13px; font-weight: 700; }
+.anatele-svg__ring { fill: none; stroke: var(--md-default-fg-color--lighter); }
+.anatele-svg__ring--faint { stroke-dasharray: 3 3; }
+.anatele-svg__axis, .anatele-svg__grid { stroke: var(--md-default-fg-color--lightest); stroke-width: 1; }
+.anatele-svg__vec { stroke-width: 3; stroke-linecap: round; }
+.anatele-svg__vec--desired { stroke: var(--anatele-desired); }
+.anatele-svg__vec--actual { stroke: var(--anatele-accent); }
+.anatele-svg__dot--desired { fill: var(--anatele-desired); stroke: var(--anatele-desired); stroke-width: 2; }
+.anatele-svg__dot--actual { fill: var(--anatele-accent); stroke: var(--anatele-accent); stroke-width: 2; }
+.anatele-svg__dot.is-below { fill: var(--md-default-bg-color); }
+
+.anatele-svg__frame { stroke: var(--md-default-fg-color--light); stroke-width: 5; stroke-linecap: round; }
+.anatele-svg__nose { fill: var(--md-default-fg-color--light); }
+.anatele-svg__rotor { fill: var(--md-default-bg-color); stroke: var(--md-default-fg-color--lighter); stroke-width: 2; }
+.anatele-svg__rotor.is-saturated { stroke: var(--anatele-warn); stroke-dasharray: 4 3; }
+.anatele-svg__rotor-fill { fill: var(--anatele-accent); opacity: 0.35; }
+
+.anatele-svg__signal { fill: none; stroke: var(--md-default-fg-color--light); stroke-width: 1.2; }
+.anatele-svg__sample { fill: var(--md-default-fg-color--light); }
+.anatele-svg__sample.is-above { fill: var(--anatele-accent); }
+.anatele-svg__threshold { stroke: var(--anatele-accent); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.anatele-svg__run { fill: var(--anatele-accent); opacity: 0.1; }
+.anatele-svg__run.is-qualifying { opacity: 0.3; }
+
+.anatele-svg__radius { fill: var(--anatele-accent); fill-opacity: 0.15; stroke: var(--anatele-accent); }
+.anatele-svg__margin { fill: none; stroke: var(--anatele-accent); stroke-dasharray: 4 3; }
+.anatele-svg__link { stroke: var(--md-default-fg-color--light); stroke-dasharray: 2 3; }
+.anatele-svg__handle { cursor: grab; outline: none; }
+.anatele-svg__handle circle { fill: var(--md-default-bg-color); stroke: var(--md-default-fg-color); stroke-width: 2; }
+.anatele-svg__handle--W circle { stroke: var(--anatele-accent); }
+.anatele-svg .anatele-svg__handle text { fill: var(--md-default-fg-color); font-size: 10px; font-weight: 700; pointer-events: none; }
+.anatele-svg__handle:focus-visible circle { stroke-width: 4; }
+
+/* Motor bars */
+.anatele-bars { display: grid; gap: 0.25em; margin-top: 0.6em; }
+.anatele-bar {
+  display: grid;
+  grid-template-columns: 4.5em minmax(4rem, 1fr) auto;
+  gap: 0.6em;
+  align-items: center;
+}
+.anatele-bar__track {
+  position: relative;
+  height: 0.8em;
+  border-radius: 0.15rem;
+  background: var(--md-default-fg-color--lightest);
+  overflow: hidden;
+}
+.anatele-bar__band { position: absolute; top: 0; bottom: 0; background: var(--md-default-fg-color--lightest); }
+.anatele-bar__fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--anatele-accent); opacity: 0.8; }
+.anatele-bar__demand { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--md-default-fg-color); }
+.anatele-bar__value { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.anatele-bar.is-saturated .anatele-bar__value { color: var(--anatele-warn); font-weight: 600; }
+.anatele-bar.is-saturated .anatele-bar__fill { background: var(--anatele-warn); }
+
+/* Hypothesis rows */
+.anatele-hyp { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.6em; margin-top: 0.6em; }
+.anatele-hyp__row {
+  margin: 0;
+  padding: 0.4em 0.7em 0.5em;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.2rem;
+  min-width: 0;
+}
+.anatele-hyp__row > legend { font-weight: 600; padding: 0 0.3em; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .anatele-bar__fill { transition: width 0.1s linear; }
+}

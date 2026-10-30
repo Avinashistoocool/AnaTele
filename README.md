@@ -89,6 +89,7 @@ anatele export  simulations/sim_motor_failure.tlog -o motor_failure.ant   # shar
 
 Browse everything at **[avinashistoocool.github.io/AnaTele](https://avinashistoocool.github.io/AnaTele/)**.
 
+- [**Learn AnaTele from scratch**](https://avinashistoocool.github.io/AnaTele/learn/) ([PDF](docs/AnaTele_Illustrated_Guide.pdf)): an illustrated course for complete beginners. It has 12 chapters, 32 figures drawn from real simulated flights, and interactive widgets. It covers drones, logs, flight phases, tilt error, motors, sensors, rules, hypotheses, missions, the simulator and `.ant` sharing. Regenerate the figures with `python docs/figures/make_guide_figures.py`.
 - [**Technical report (PDF)**](docs/AnaTele_Technical_Report.pdf): the architecture and all of the mathematics, including framing, clock epochs, phase inference, tilt error, mixer decomposition, the rule detectors, hypothesis scoring, waypoint geometry, the simulator physics and the `.ant` integrity model. The LaTeX source is in [`docs/AnaTele_Technical_Report.tex`](docs/AnaTele_Technical_Report.tex).
 - [**Usage guide**](docs/USAGE.md): desktop app walkthrough, CLI, web UI, API, profiles and the simulator.
 - [**Diagnostics reference**](docs/DIAGNOSTICS.md): every rule, the hypothesis ranking, flight phases, mission statuses and how to read *unassessable*.

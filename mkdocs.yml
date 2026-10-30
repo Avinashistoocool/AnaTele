@@ -10,6 +10,7 @@ docs_dir: docs
 strict: true
 exclude_docs: |
   *.tex
+  figures/
 
 theme:
   name: material
@@ -32,6 +33,23 @@ theme:
 
 nav:
   - Home: index.md
+  - Learn (illustrated guide):
+      - Start here: learn/index.md
+      - 1. Drones 101: learn/01-drones-101.md
+      - 2. Logs and MAVLink: learn/02-logs-and-mavlink.md
+      - 3. Time and sources: learn/03-time-and-sources.md
+      - 4. Flight phases: learn/04-flight-phases.md
+      - 5. Attitude and tilt error: learn/05-attitude-and-tilt-error.md
+      - 6. Motors and mixing: learn/06-motors-and-mixing.md
+      - 7. Vibration, EKF and compass: learn/07-vibration-ekf-compass.md
+      - 8. Rules and their four states: learn/08-rules-and-states.md
+      - 9. Hypotheses: learn/09-hypotheses.md
+      - 10. Missions and geometry: learn/10-missions-and-geometry.md
+      - 11. The simulator: learn/11-simulator.md
+      - 12. Sharing with .ant files: learn/12-sharing-ant.md
+      - Glossary: learn/glossary.md
+      - Interactive widgets: learn/widgets-demo.md
+      - Illustrated guide (PDF): AnaTele_Illustrated_Guide.pdf
   - Usage guide: USAGE.md
   - Diagnostics reference: DIAGNOSTICS.md
   - Deployment: DEPLOYMENT.md
@@ -41,10 +59,22 @@ nav:
 markdown_extensions:
   - admonition
   - attr_list
+  - md_in_html
   - tables
   - toc: {permalink: true}
+  - pymdownx.details
   - pymdownx.superfences
   - pymdownx.highlight
+  - pymdownx.tabbed: {alternate_style: true}
+  - pymdownx.arithmatex: {generic: true}
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - javascripts/learn.js
+
+extra_css:
+  - stylesheets/learn.css
 
 extra:
   social:

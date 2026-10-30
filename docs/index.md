@@ -29,6 +29,7 @@ anatele simulations/sim_motor_failure.tlog
 
 | | |
 |---|---|
+| [**Learn AnaTele from scratch**](learn/index.md) | Illustrated course, no background needed: 12 chapters, 32 figures, interactive widgets ([PDF](AnaTele_Illustrated_Guide.pdf)) |
 | [Usage guide](USAGE.md) | Desktop walkthrough, CLI, web UI, API, profiles, simulator, `.ant` sharing |
 | [Diagnostics reference](DIAGNOSTICS.md) | Every rule, hypothesis ranking, flight phases, mission statuses |
 | [Deployment](DEPLOYMENT.md) | Standalone builds, pip, Docker, data directories, security |
