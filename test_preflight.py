@@ -152,6 +152,47 @@ class PreflightTests(unittest.TestCase):
             self.assertEqual(len(list(Path(temp).glob("preflight-*.json"))), 2)
 
 
+class PortScanTests(unittest.TestCase):
+    def fake_ports(self):
+        from types import SimpleNamespace as P
+        return [P(device="COM3", description="Standard Serial over Bluetooth link (COM3)", manufacturer="Microsoft",
+                  product=None, hwid="BTHENUM\\{...}", vid=None),
+                P(device="COM7", description="USB Serial Port", manufacturer="FTDI", product=None,
+                  hwid="USB VID:PID=0403:6015", vid=0x0403),
+                P(device="COM9", description="ArduPilot (COM9)", manufacturer="ArduPilot Project", product=None,
+                  hwid="USB VID:PID=1209:5741", vid=0x1209)]
+
+    def test_ports_ranked_and_bluetooth_skipped(self):
+        from unittest import mock
+
+        from telemetry_platform.preflight import ports
+        with mock.patch("serial.tools.list_ports.comports", return_value=self.fake_ports()):
+            self.assertEqual([p.device for p in ports.list_ports()], ["COM9", "COM7", "COM3"])
+            devices = [d for d, _ in ports.candidates(115200)]
+        self.assertEqual(devices[0], "COM9")
+        self.assertNotIn("COM3", devices)
+        self.assertEqual(devices[-1], ports.UDP_DEFAULT)
+
+    def test_auto_detect_picks_first_port_with_heartbeat(self):
+        from unittest import mock
+
+        from telemetry_platform.preflight import ports
+        from telemetry_platform.preflight.link import LinkError
+
+        def opener(device, baud=115200):
+            if device == "COM9":
+                raise LinkError("access denied")
+            return Link(FakeVehicle(silent=device != "COM7"))
+
+        with mock.patch("serial.tools.list_ports.comports", return_value=self.fake_ports()), \
+                mock.patch.object(Link, "open", side_effect=opener):
+            link = ports.auto_detect(timeout=1)
+            self.assertIn("COM7", link.description)
+            with mock.patch.object(Link, "open", side_effect=LinkError("busy")):
+                with self.assertRaises(LinkError):
+                    ports.auto_detect(timeout=1, include_udp=False)
+
+
 @unittest.skipUnless(os.environ.get("QT_QPA_PLATFORM") == "offscreen", "needs QT_QPA_PLATFORM=offscreen")
 class PreflightGuiTests(unittest.TestCase):
     def test_window_builds(self):
@@ -162,6 +203,11 @@ class PreflightGuiTests(unittest.TestCase):
         QApplication.instance() or QApplication([])
         window = PreflightWindow("sim:")
         self.assertEqual(window.table.rowCount(), 8)
+        self.assertEqual(window.connection_text(), "sim:")
+        window.refresh_ports("auto")
+        self.assertEqual(window.connection_text(), "auto")
+        window.connect_edit.setEditText("tcp:127.0.0.1:5760")
+        self.assertEqual(window.connection_text(), "tcp:127.0.0.1:5760")
         self.assertFalse(window.props.isChecked())
         self.assertEqual(preflight_command()[-1], "preflight")
         window.close()

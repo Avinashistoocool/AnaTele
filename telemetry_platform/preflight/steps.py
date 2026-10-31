@@ -14,7 +14,8 @@ from dataclasses import dataclass, field
 
 from pymavlink.dialects.v20 import ardupilotmega as mavlink
 
-from .link import Link, LinkError, enum_name, firmware_version, result_name
+from .link import AUTO, Link, LinkError, enum_name, firmware_version, result_name
+from .ports import auto_detect
 
 PASS, WARN, FAIL, SKIPPED, NEEDS_USER = "PASS", "WARN", "FAIL", "SKIPPED", "NEEDS_USER"
 SEVERITY = {PASS: 0, SKIPPED: 0, WARN: 1, NEEDS_USER: 2, FAIL: 3}
@@ -224,8 +225,13 @@ def result(status, message, **details):
 def step_connect(ctx):
     opt = ctx.options
     if ctx.link is None:
-        ctx.log(f"Opening {opt.connect} (baud {opt.baud})")
-        ctx.link = ctx.runner.link = Link.open(opt.connect, opt.baud)
+        if opt.connect.strip().lower() in AUTO:
+            ctx.log("Auto-detecting the vehicle: scanning USB serial ports, then UDP 14550 ...")
+            ctx.link = ctx.runner.link = auto_detect(opt.baud, log=ctx.log)
+            ctx.log(f"Found vehicle on {ctx.link.description}")
+        else:
+            ctx.log(f"Opening {opt.connect} (baud {opt.baud})")
+            ctx.link = ctx.runner.link = Link.open(opt.connect, opt.baud)
     hb = ctx.link.wait_heartbeat(opt.heartbeat_timeout)
     if hb is None:
         return result(FAIL, f"No HEARTBEAT within {opt.heartbeat_timeout:.0f} s. Check the port/baud rate, "

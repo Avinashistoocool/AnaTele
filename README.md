@@ -99,11 +99,12 @@ Browse everything at **[avinashistoocool.github.io/AnaTele](https://avinashistoo
 
 ## AnaTele Preflight (live vehicle)
 
-AnaTele Preflight is a **separate tool**. It is the only part of AnaTele that connects to a live vehicle, over USB (`COM3`), telemetry radio, UDP (`udpin:0.0.0.0:14550`) or TCP. One button, **Run full preflight**, runs in order: gyro and barometer calibration, level calibration, guided compass calibration, guided 6-position accelerometer calibration, pre-arm health (sensors, EKF, GPS, battery, RC, `PreArm:` messages), a props-off motor test and a parameter-profile comparison. It pauses whenever you need to move the vehicle, and it writes a JSON and Markdown report.
+AnaTele Preflight is a **separate tool**. It is the only part of AnaTele that connects to a live vehicle. It **auto-detects** the flight controller (USB ports first, then UDP 14550), or you can pick USB (`COM3`), telemetry radio, UDP (`udpin:0.0.0.0:14550`) or TCP. One button, **Run full preflight**, runs in order: gyro and barometer calibration, level calibration, guided compass calibration, guided 6-position accelerometer calibration, pre-arm health (sensors, EKF, GPS, battery, RC, `PreArm:` messages), a props-off motor test and a parameter-profile comparison. It pauses whenever you need to move the vehicle, and it writes a JSON and Markdown report.
 
 ```bash
-anatele preflight                         # window (also: desktop app > Tools > Preflight checklist)
-anatele preflight --no-gui --connect COM3  # terminal
+anatele preflight                         # window, auto-detects the vehicle (also: desktop app > Tools > Preflight checklist)
+anatele preflight --list-ports            # show detected serial ports
+anatele preflight --no-gui                # terminal, auto-detect (or --connect COM3)
 anatele preflight --simulate               # try it without hardware
 ```
 

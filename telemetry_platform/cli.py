@@ -116,7 +116,10 @@ def preflight(argv):
         prog="anatele preflight",
         description="AnaTele Preflight: calibrations and pre-flight checklist on a LIVE vehicle (separate from the "
                     "read-only analyser). Calibrations change vehicle state; the vehicle is never armed.")
-    parser.add_argument("--connect", default="", help="COM3, /dev/ttyACM0, udpin:0.0.0.0:14550, tcp:host:port")
+    parser.add_argument("--connect", default="auto",
+                        help="auto (default: scan USB serial ports, then UDP 14550), COM3, /dev/ttyACM0, "
+                             "udpin:0.0.0.0:14550, tcp:host:port")
+    parser.add_argument("--list-ports", action="store_true", help="List serial ports (likely flight controller first) and exit")
     parser.add_argument("--baud", type=int, default=115200, help="Serial baud rate (default 115200)")
     parser.add_argument("--simulate", action="store_true", help="Use the built-in simulated vehicle")
     parser.add_argument("--no-gui", action="store_true", help="Run in the terminal, prompting there for guided steps")
@@ -129,6 +132,14 @@ def preflight(argv):
                         help="Confirm ALL propellers are removed (enables the motor test; asked again in the terminal)")
     parser.add_argument("--motor-throttle", type=float, default=6.0, help="Motor test throttle percent (1-15, default 6)")
     args = parser.parse_args(argv)
+    if args.list_ports:
+        from .preflight.ports import list_ports
+        ports = list_ports()
+        for port in ports:
+            print(port.label)
+        if not ports:
+            print("No serial ports found.")
+        return 0
     connect = "sim:" if args.simulate else args.connect
     if not args.no_gui and not args.save_profile:
         from .preflight.gui import main as gui
@@ -141,7 +152,7 @@ def preflight(argv):
     from .preflight.steps import ConsolePrompter, Options, Runner, load_profile, save_profile
 
     if not connect:
-        parser.error("--connect is required in --no-gui mode (or use --simulate)")
+        connect = "auto"
     try:
         profile = load_profile(args.profile) if args.profile else None
         link = Link.open(connect, args.baud)

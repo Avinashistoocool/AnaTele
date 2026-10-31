@@ -10,6 +10,7 @@ from pymavlink.dialects.v20 import ardupilotmega as mavlink
 
 GCS_SYSTEM, GCS_COMPONENT = 255, 190
 SIMULATED = ("sim", "sim:", "simulate")
+AUTO = ("auto", "auto:", "")
 
 
 class LinkError(Exception):
@@ -52,13 +53,15 @@ class Link:
 
     @classmethod
     def open(cls, device, baud=115200):
-        """Open COM3 / /dev/ttyACM0 (USB serial), udpin:0.0.0.0:14550, udpout:..., tcp:host:port, or sim: (simulated)."""
+        """Open auto (scan serial ports + UDP 14550), COM3 / /dev/ttyACM0 (USB serial), udpin:0.0.0.0:14550,
+        udpout:..., tcp:host:port, or sim: (simulated). An empty string means auto."""
         device = (device or "").strip()
         if device.lower() in SIMULATED:
             from .fake import FakeVehicle
             return cls(FakeVehicle(realtime=True), description="simulated vehicle")
-        if not device:
-            raise LinkError("No connection string given (e.g. COM3, udpin:0.0.0.0:14550, tcp:127.0.0.1:5760 or sim:)")
+        if device.lower() in AUTO:
+            from .ports import auto_detect
+            return auto_detect(baud)
         from pymavlink import mavutil
         try:
             conn = mavutil.mavlink_connection(device, baud=int(baud), source_system=GCS_SYSTEM,

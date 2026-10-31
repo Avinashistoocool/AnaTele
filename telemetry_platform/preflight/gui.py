@@ -16,7 +16,7 @@ from PySide6.QtCore import QObject, Qt, QUrl, Signal
 from PySide6.QtGui import QColor, QDesktopServices, QFont, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView, QApplication, QCheckBox, QComboBox, QFileDialog, QGroupBox, QHBoxLayout, QHeaderView, QLabel,
-    QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QSplitter, QTableWidget,
+    QMainWindow, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QSplitter, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QWidget,
 )
 
@@ -83,8 +83,16 @@ class PreflightWindow(QMainWindow):
 
         conn_box = QGroupBox("Connection")
         row = QHBoxLayout(conn_box)
-        self.connect_edit = QLineEdit(connect)
-        self.connect_edit.setPlaceholderText("COM3, /dev/ttyACM0, udpin:0.0.0.0:14550, tcp:127.0.0.1:5760 or sim:")
+        self.connect_edit = QComboBox()
+        self.connect_edit.setEditable(True)
+        self.connect_edit.setInsertPolicy(QComboBox.NoInsert)
+        self.connect_edit.lineEdit().setPlaceholderText("auto, COM3, /dev/ttyACM0, udpin:0.0.0.0:14550, tcp:127.0.0.1:5760 or sim:")
+        self.connect_edit.setToolTip("Auto scans USB serial ports (flight controllers first), then UDP 14550.\n"
+                                     "Pick a detected port, or type any MAVLink connection string.")
+        self.refresh_ports(connect or "auto")
+        refresh = QPushButton("Refresh")
+        refresh.setToolTip("Re-scan serial ports")
+        refresh.clicked.connect(lambda: self.refresh_ports(self.connection_text()))
         self.baud = QComboBox()
         self.baud.setEditable(True)
         self.baud.addItems(["115200", "57600", "921600", "500000", "230400"])
@@ -95,6 +103,7 @@ class PreflightWindow(QMainWindow):
         self.vehicle_label.setStyleSheet("color:#909090")
         row.addWidget(QLabel("Connection"))
         row.addWidget(self.connect_edit, 3)
+        row.addWidget(refresh)
         row.addWidget(QLabel("Baud"))
         row.addWidget(self.baud)
         row.addWidget(self.connect_button)
@@ -211,8 +220,35 @@ class PreflightWindow(QMainWindow):
             baud = int(self.baud.currentText())
         except ValueError:
             baud = 115200
-        return Options(connect=self.connect_edit.text().strip(), baud=baud, skip=set(self.skip),
+        return Options(connect=self.connection_text(), baud=baud, skip=set(self.skip),
                        props_removed=self.props.isChecked(), profile=self.profile)
+
+    def connection_text(self):
+        """The connection string: the selected item's data (e.g. COM9), or whatever the user typed."""
+        text = self.connect_edit.currentText().strip()
+        index = self.connect_edit.findText(text)
+        if index >= 0 and self.connect_edit.itemData(index):
+            return self.connect_edit.itemData(index)
+        return text
+
+    def refresh_ports(self, keep="auto"):
+        from .ports import UDP_DEFAULT, list_ports
+        ports = list_ports()
+        self.connect_edit.clear()
+        self.connect_edit.addItem("Auto-detect (scan USB, then UDP 14550)", "auto")
+        for port in ports:
+            self.connect_edit.addItem(port.label, port.device)
+        self.connect_edit.addItem(f"Telemetry over UDP ({UDP_DEFAULT})", UDP_DEFAULT)
+        self.connect_edit.addItem("Simulated vehicle (no hardware)", "sim:")
+        index = self.connect_edit.findData(keep)
+        if index >= 0:
+            self.connect_edit.setCurrentIndex(index)
+        else:
+            self.connect_edit.setEditText(keep)
+        found = [p for p in ports if p.rank == 0]
+        if hasattr(self, "log"):
+            self.append_log(f"Serial ports: {len(ports)} found" +
+                            (f"; flight controller on {', '.join(p.device for p in found)}" if found else ""))
 
     def busy(self, value):
         for widget in self.busy_widgets:
@@ -224,9 +260,6 @@ class PreflightWindow(QMainWindow):
         if self.worker and self.worker.is_alive():
             return
         options = self.options()
-        if self.link is None and not options.connect:
-            QMessageBox.warning(self, "Preflight", "Enter a connection string first (for example COM3 or sim:).")
-            return
         if only is None:
             for index in range(len(STEPS)):
                 self.set_status(index, "", "")

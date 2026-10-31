@@ -37,8 +37,19 @@ one pass.
 
 ## Connecting
 
+You usually don't need a connection string. **Auto-detect is the default.** It lists the serial ports, puts
+anything that looks like a flight controller first (USB vendor ids of ArduPilot/ChibiOS boards, or "ArduPilot",
+"Pixhawk", "Cube" in the name), then USB-serial radios, and finally listens on UDP 14550. It picks the first one
+that sends an autopilot HEARTBEAT. While scanning it only *listens*; nothing is sent until a vehicle answers.
+Bluetooth serial ports are skipped because opening them can hang; choose one by hand if your radio uses Bluetooth.
+
+```bash
+anatele preflight --list-ports   # what auto-detect would see, flight controller first
+```
+
 | Link | Connection string | Notes |
 |---|---|---|
+| Auto-detect | `auto` (default) | Scans USB serial, then `udpin:0.0.0.0:14550`. |
 | USB (Windows) | `COM3` | Baud is ignored for native USB, but 115200 is the usual value. Close Mission Planner/QGC first; only one program can open the port. |
 | USB (Linux/macOS) | `/dev/ttyACM0`, `/dev/tty.usbmodem*` | You may need to be in the `dialout` group. |
 | Telemetry radio | `COM5` with baud `57600` | SiK radios default to 57600. |
@@ -53,15 +64,17 @@ ground station asks.
 ## Using the window
 
 ```bash
-anatele preflight                      # opens the Preflight window
-anatele preflight --connect COM3       # pre-fills the connection
+anatele preflight                      # opens the Preflight window (auto-detect selected)
+anatele preflight --connect COM3       # pre-selects a port
 anatele preflight --simulate           # simulated vehicle
 ```
 
 You can also open it from the desktop app: **Tools → Preflight checklist…**.
 
-1. Type the connection string, choose the baud rate and press **Connect**. Or press **Run full preflight**
-   straight away; it connects first.
+1. The **Connection** list shows *Auto-detect*, every detected serial port (flight controllers first), UDP 14550
+   and the simulated vehicle. Leave it on Auto-detect, pick a port, or type any connection string. **Refresh**
+   re-scans after you plug the board in. Press **Connect**, or press **Run full preflight** straight away; it
+   connects first.
 2. Optional: **Load profile…** to compare parameters, and tick **Props removed** if you want the motor test.
 3. Press **Run full preflight**. The checklist table fills in with coloured statuses, the progress bar shows the
    current step, and the log pane shows every vehicle message.
@@ -73,6 +86,7 @@ You can also open it from the desktop app: **Tools → Preflight checklist…**.
 ## Using the terminal
 
 ```bash
+anatele preflight --no-gui                      # auto-detect
 anatele preflight --no-gui --connect COM3
 anatele preflight --no-gui --connect udpin:0.0.0.0:14550 --profile quad.json --report-dir reports
 anatele preflight --no-gui --connect COM3 --props-removed          # asks you to type "props off"
@@ -82,7 +96,8 @@ anatele preflight --no-gui --connect COM3 --save-profile quad.json  # save curre
 
 | Option | Meaning |
 |---|---|
-| `--connect STR` | Connection string (see the table above) |
+| `--connect STR` | Connection string (see the table above); default `auto` |
+| `--list-ports` | List serial ports, likely flight controller first, and exit |
 | `--baud N` | Serial baud rate (default 115200) |
 | `--simulate` | Use the built-in simulated vehicle |
 | `--no-gui` | Run in the terminal. Guided steps prompt there: **Enter** = Next/Yes, `n` = No, `c` = Cancel |
