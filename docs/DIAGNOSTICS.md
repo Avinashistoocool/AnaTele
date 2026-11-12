@@ -1,6 +1,6 @@
 # Diagnostics reference
 
-How AnaTele turns records into findings and ranked hypotheses, and how to read each result.
+This document tells how AnaTele changes records into findings and hypotheses in sequence. It also tells how to read each result.
 
 - [Principles](#principles)
 - [Pipeline](#pipeline)
@@ -16,11 +16,11 @@ How AnaTele turns records into findings and ranked hypotheses, and how to read e
 
 ## Principles
 
-1. **Observations and interpretations stay separate.** A STATUSTEXT saying "Crash: Disarming" is an observation. "A motor failed" would be an interpretation, and AnaTele never states it as fact.
-2. **Every finding carries evidence** (record ids, linked to raw bytes) and a list of what is *missing* to strengthen it.
-3. **Missing data means unknown.** If a rule can't answer, it says `unassessable`. It never says "OK".
-4. **No probabilities without labelled outcomes.** Hypotheses get a screening order and a label, not a percentage.
-5. **Firmware meaning is versioned.** For example, Copter 4.7.2 `AngErr` is a thrust-vector tracking error, not a yaw error, and `ARMING_SKIPCHK` bit 7 skips the board-voltage check, not the compass check.
+1. **AnaTele keeps observations and interpretations separate.** A STATUSTEXT with the text "Crash: Disarming" is an observation. "A motor failed" is an interpretation. AnaTele never gives an interpretation as a fact.
+2. **Each finding has evidence** (record ids, with links to the raw bytes). Each finding also has a list of the *missing* data that can make it stronger.
+3. **Missing data means unknown.** If a rule cannot answer, it gives `unassessable`. It never gives "OK".
+4. **AnaTele gives no probabilities without labelled outcomes.** Each hypothesis gets a screening order and a label, not a percentage.
+5. **Firmware meaning has versions.** For example, in Copter 4.7.2, `AngErr` is a tracking error of the thrust vector, not a yaw error. Also, `ARMING_SKIPCHK` bit 7 skips the board-voltage check, not the compass check.
 
 ## Pipeline
 
@@ -36,79 +36,79 @@ file ──► parser (CRC, resync, limits) ──► observations (Parquet, byt
      ──► manifest (hashes, versions, limitations)
 ```
 
-Diagnosis always uses full-resolution observations. Plot envelopes are never used.
+The diagnosis always uses the observations at full resolution. It never uses the plot envelopes.
 
 ## Flight phases
 
-For each armed episode (from the vehicle HEARTBEAT armed flag, or DataFlash `ARM`):
+AnaTele finds each armed episode from the armed flag in the vehicle HEARTBEAT, or from DataFlash `ARM`. For each armed episode, it gives one of these statuses:
 
 | Status | Meaning |
 |---|---|
 | `airborne_reported` | EXTENDED_SYS_STATE reported *In air* or *Taking off*. |
-| `airborne_inferred` | Home-relative altitude rose ≥ 1 m above the median of the first 2 s, **and** throttle ≥ 10 % or a motor output ≥ 25 % appeared within 5 s before the rise. Takeoff is backdated to the last sample ≤ 0.2 m above baseline. |
-| `no_airborne_evidence` | Armed, but no qualifying rise. A very low hover can't be told apart from estimate noise. |
-| `unassessable` | No home-relative altitude in the episode. |
+| `airborne_inferred` | The altitude above home increased by ≥ 1 m above the median of the first 2 s. **Also**, throttle ≥ 10 % or a motor output ≥ 25 % occurred in the 5 s before the increase. The takeoff time is set back to the last sample that is ≤ 0.2 m above the baseline. |
+| `no_airborne_evidence` | Armed, but no applicable increase in altitude. AnaTele cannot tell the difference between a hover at a low altitude and noise in the estimate. |
+| `unassessable` | The episode has no altitude above home. |
 
 Derived times:
 
-- **Attitude excursion:** first |roll| or |pitch| > 60° after takeoff (a possible loss of control or impact).
-- **Pre-event window:** from takeoff to the earlier of the excursion and *crash report − 3 s*. Rules that ask "was this happening **before** the upset?" use this window.
-- **Event and after:** from the end of the pre-event window to disarm. It is used for contrast, e.g. "vibration 66 at impact, 24 before".
+- **Attitude excursion:** the first time that |roll| or |pitch| > 60° after takeoff (a possible loss of control or impact).
+- **Pre-event window:** from takeoff to the earlier of the excursion and *crash report − 3 s*. The rules that ask "did this occur **before** the upset?" use this window.
+- **Event and after:** from the end of the pre-event window to disarm. AnaTele uses it for contrast, for example "vibration 66 at impact, 24 before".
 
-All thresholds are recorded in each phase's `config`. They are analysis choices, not firmware behaviour.
+Each phase records all thresholds in its `config`. The thresholds are analysis decisions. They are not firmware behaviour.
 
 ## Rule states
 
 | State | Meaning |
 |---|---|
-| `triggered` | The condition was met. Becomes a finding with evidence. |
-| `not_triggered` | The data was adequate and the condition was not met. This is **not** a health certificate. |
-| `unassessable` | The data couldn't answer: signals missing, too few samples, or a sample interval too coarse for the persistence criterion. |
-| `not_applicable` | The question doesn't apply (e.g. a ground-only episode, or no expected parameters in the profile). |
+| `triggered` | The condition occurred. The result becomes a finding with evidence. |
+| `not_triggered` | The data was sufficient, and the condition did not occur. This is **not** a health certificate. |
+| `unassessable` | The data could not answer. Possible causes: missing signals, too few samples, or a sample interval that is too long for the persistence criterion. |
+| `not_applicable` | The question does not apply (for example, an episode on the ground only, or a profile with no expected parameters). |
 
 ## Rule catalogue
 
-Rules live in [`telemetry_platform/rules/core.yaml`](https://github.com/Avinashistoocool/AnaTele/blob/main/telemetry_platform/rules/core.yaml) (pack `core`, version 2).
-Scopes: *event* (one result per anchor event), *source*, *episode* (per armed episode), *series*, *snapshot* (parameter set).
+The rules are in [`telemetry_platform/rules/core.yaml`](https://github.com/Avinashistoocool/AnaTele/blob/main/telemetry_platform/rules/core.yaml) (pack `core`, version 2).
+Scopes: *event* (one result for each anchor event), *source*, *episode* (for each armed episode), *series*, *snapshot* (parameter set).
 
 | Rule id | Scope | Detector | Triggers when |
 |---|---|---|---|
-| `crash-check-disarm` | event | event_present | A crash-check disarm message is recorded. Firmware note explains `AngErr`. |
-| `compass-event-before-crash-check` | event | event_sequence | Compass selection, EKF lane switch or yaw reset ≤ 20 s before a crash report. Supported by compass ratio > 1 for ≥ 2 s before it; **contradicted** if tilt error > 30° for ≥ 0.5 s came first. |
-| `prearm-radio-failsafe` | source | event_present | "PreArm: Radio failsafe". Adds the mapped throttle channel (`rc.ch{RCMAP_THROTTLE}`) near each report, compared with `FS_THR_VALUE`. |
+| `crash-check-disarm` | event | event_present | The log has a crash-check disarm message. A firmware note explains `AngErr`. |
+| `compass-event-before-crash-check` | event | event_sequence | A compass selection, an EKF lane switch or a yaw reset occurred ≤ 20 s before a crash report. A compass ratio > 1 for ≥ 2 s before the event supports it. A tilt error > 30° for ≥ 0.5 s that occurred first **contradicts** it. |
+| `prearm-radio-failsafe` | source | event_present | "PreArm: Radio failsafe". The result adds the mapped throttle channel (`rc.ch{RCMAP_THROTTLE}`) near each report, compared with `FS_THR_VALUE`. |
 | `arming-rejected-auto-mode` | source | event_present | "Auto mode not armable". |
 | `arming-rejected-throttle-high` | source | event_present | "Throttle too high". |
-| `gps-configuration-rejected` | source | event_present | "unable to configure band" or "still configuring", with the contemporaneous fix type and h_acc. |
-| `compasses-inconsistent-reported` | source | event_present | "Compasses inconsistent". Post-incident reports don't establish pre-flight inconsistency. |
-| `vibration-persistent-pre-event` | episode | persistence | Any IMU axis > profile threshold (default 30) for ≥ 2 s, or > 60 for ≥ 1 s, in the pre-event window. |
-| `clipping-pre-event` | episode | counter_increment | Positive clipping-counter increments between consecutive observations ≤ 3 s apart in the pre-event window. Decreases count as resets. |
-| `vibration-peak-sample` | series | peak | A single sample exceeds the threshold. This is a weaker, context-free signal. |
+| `gps-configuration-rejected` | source | event_present | "unable to configure band" or "still configuring", with the fix type and h_acc at the same time. |
+| `compasses-inconsistent-reported` | source | event_present | "Compasses inconsistent". A report after the incident does not prove that the compasses were inconsistent before the flight. |
+| `vibration-persistent-pre-event` | episode | persistence | An IMU axis > the profile threshold (default 30) for ≥ 2 s, or > 60 for ≥ 1 s, in the pre-event window. |
+| `clipping-pre-event` | episode | counter_increment | Positive increments of the clipping counter between sequential observations ≤ 3 s apart, in the pre-event window. A decrease counts as a reset. |
+| `vibration-peak-sample` | series | peak | One sample is more than the threshold. This signal is weaker and has no context. |
 | `tracking-loss` | episode | persistence | Tilt tracking error > 30° for ≥ 0.5 s before the upset. |
-| `ekf-compass-innovation-pre-event` | episode | persistence | EKF compass test ratio > 1.0 for ≥ 2 s pre-event. Also reports the armed-on-ground value: a rise only under thrust is consistent with motor-current interference. |
-| `motor-ceiling-saturation` | episode | persistence | A motor at its maximum output (`MOT_SPIN_MAX`) for ≥ 1 s pre-event. |
-| `motor-floor-saturation-pre-event` | episode | persistence | A motor at its minimum airborne output (`MOT_SPIN_MIN`) for ≥ 2 s pre-event (excluding the first 2 s after takeoff). |
-| `motor-output-imbalance-pre-event` | episode | motor_balance | Spread of mean motor commands > 0.12 of the PWM range. Decomposed into roll/pitch/yaw using the frame geometry; flags *predominantly yaw* imbalance. |
-| `power-monitoring-gap` | source | coverage | No battery-voltage samples while armed. Blocks the power hypothesis. |
+| `ekf-compass-innovation-pre-event` | episode | persistence | EKF compass test ratio > 1.0 for ≥ 2 s before the event. The result also gives the value when the vehicle was armed on the ground. An increase only under thrust agrees with interference from the motor current. |
+| `motor-ceiling-saturation` | episode | persistence | A motor at its maximum output (`MOT_SPIN_MAX`) for ≥ 1 s before the event. |
+| `motor-floor-saturation-pre-event` | episode | persistence | A motor at its minimum airborne output (`MOT_SPIN_MIN`) for ≥ 2 s before the event (the first 2 s after takeoff are not included). |
+| `motor-output-imbalance-pre-event` | episode | motor_balance | The spread of the mean motor commands is > 0.12 of the PWM range. AnaTele decomposes the spread into roll/pitch/yaw with the frame geometry. It flags an imbalance that is *predominantly yaw*. |
+| `power-monitoring-gap` | source | coverage | No battery-voltage samples while the vehicle was armed. This rule blocks the power hypothesis. |
 | `batt-monitor-disabled` | snapshot | parameter | `BATT_MONITOR = 0` (instance 1 only). |
-| `fs-gcs-disabled` | snapshot | parameter | `FS_GCS_ENABLE = 0`. Context, not a fault. |
-| `arming-skipchk-board-voltage` | snapshot | parameter | `ARMING_SKIPCHK` bit 7 set. Only assessed under the Copter 4.7.2 semantic pack. |
-| `profile-parameter-mismatch` | snapshot | profile_parameters | Observed values differ from the profile's expected parameters. |
+| `fs-gcs-disabled` | snapshot | parameter | `FS_GCS_ENABLE = 0`. This is context, not a fault. |
+| `arming-skipchk-board-voltage` | snapshot | parameter | `ARMING_SKIPCHK` bit 7 is set. AnaTele examines this rule only with the Copter 4.7.2 semantic pack. |
+| `profile-parameter-mismatch` | snapshot | profile_parameters | The observed values are different from the expected parameters of the profile. |
 
 ### Derived indicators used by rules
 
-- **Tilt tracking error:** the angle between the thrust vectors implied by desired and estimated roll/pitch, paired within 0.25 s. It matches the *meaning* of Copter's crash-check `AngErr`, but uses telemetry-rate samples.
-- **Motor mapping:** `SERVOn_FUNCTION` 33–40 → motor 1–8. Floor and ceiling come from `MOT_PWM_MIN/MAX` and `MOT_SPIN_MIN/MAX`. Frames: QUAD/X and QUAD/+. Other frames are mapped but not decomposed.
-- **Mixer decomposition:** a weighted difference of motor commands (right−left, front−back, CCW−CW props). A sustained negative `ccw_minus_cw` means the CW-prop motors work harder, which corresponds to sustained yaw torque demand.
+- **Tilt tracking error:** the angle between the two thrust vectors from the desired and the estimated roll/pitch. AnaTele pairs the samples if they are within 0.25 s. The *meaning* is the same as the crash-check `AngErr` of Copter, but AnaTele uses samples at the telemetry rate.
+- **Motor mapping:** `SERVOn_FUNCTION` 33–40 → motor 1–8. The floor and the ceiling come from `MOT_PWM_MIN/MAX` and `MOT_SPIN_MIN/MAX`. Frames: QUAD/X and QUAD/+. AnaTele maps other frames, but it does not decompose them.
+- **Mixer decomposition:** a weighted difference of the motor commands (right−left, front−back, CCW−CW props). A persistent negative `ccw_minus_cw` means that the motors with CW props work harder. This agrees with a persistent demand for yaw torque.
 
 ## Hypothesis ranking
 
-Hypotheses are defined in the same YAML and ranked only for episodes with a crash report:
+The same YAML file defines the hypotheses. AnaTele puts them in sequence only for the episodes that have a crash report:
 
 | Hypothesis | Supported by (family, weight) | Contradicted by |
 |---|---|---|
-| Estimator/magnetic inconsistency | compass-event-before-crash (estimator, 1), ekf-compass-innovation (magnetic, 1), compasses-inconsistent (magnetic, 0.25) | tilt tracking error preceded the compass event (1) |
+| Estimator/magnetic inconsistency | compass-event-before-crash (estimator, 1), ekf-compass-innovation (magnetic, 1), compasses-inconsistent (magnetic, 0.25) | tilt tracking error before the compass event (1) |
 | Mechanical/thrust or frame configuration | tracking-loss (control, 1), motor-floor (propulsion, 1), motor-imbalance (propulsion, 0.75), motor-ceiling (propulsion, 0.5) | none |
-| Vibration-driven estimation degradation | vibration-persistent (inertial, 1), clipping (inertial, 1) | vibration or clipping assessed and *not triggered* pre-event (0.5 each) |
+| Vibration-driven estimation degradation | vibration-persistent (inertial, 1), clipping (inertial, 1) | vibration or clipping examined and *not triggered* before the event (0.5 each) |
 | Electrical/power degradation | none | blocked by `power-monitoring-gap` |
 
 ```text
@@ -121,63 +121,67 @@ label = unassessable      if blocked, or no supporting rule could be assessed
         limited or contradicting evidence otherwise
 ```
 
-Capping by family stops repeated or correlated observations (e.g. three vibration axes) from piling up.
-The weights are expert screening choices, **not** calibrated likelihoods. Each hypothesis lists the observation
-that would best discriminate it, for example onboard XKF4 innovations, ESC telemetry or a props-off motor test.
+The limit for each family prevents an increase in the score from repeated or correlated observations (for example, three vibration axes).
+The weights are screening decisions from experts. They are **not** calibrated likelihoods. Each hypothesis shows the observation
+that can best tell it apart from the others. Examples are the onboard XKF4 innovations, ESC telemetry or a motor test with the propellers removed.
 
 ## Mission statuses
 
-Transactions (`upload`, `download`, `partial_write`, `clear`, `item_read`) are reconstructed with direction,
-broadcast-ACK matching, retransmit counting and restart detection. **Plan versions** carry a confidence level:
-`confirmed_by_ack`, `observed_onboard`, `derived_from_baseline` (a partial write onto a known plan) or `uncertain`
-(an interrupted or rejected overwrite, since ArduPilot uploads are not atomic).
+AnaTele reconstructs the transactions (`upload`, `download`, `partial_write`, `clear`, `item_read`). It finds the direction,
+matches the broadcast ACKs, counts the retransmits and finds the restarts. Each **plan version** has a confidence level:
 
-For each plan item in the episode's latest prior version:
+- `confirmed_by_ack`;
+- `observed_onboard`;
+- `derived_from_baseline` (a partial write onto a known plan);
+- `uncertain` (an interrupted or rejected overwrite, because ArduPilot uploads are not atomic).
+
+AnaTele uses the latest plan version before the episode. For each plan item in that version, it gives one of these statuses:
 
 | Status | Meaning |
 |---|---|
-| `reported_complete` | A `MISSION_ITEM_REACHED` for that sequence was received during the episode. |
-| `geometry_consistent_with_completion` | The nearest recorded position is within `WP_RADIUS_M` plus GPS h_acc. This is *not* proof. |
-| `completion_not_observed` | No report, and either no position coverage or a non-positional item (takeoff, RTL). |
-| `not_visited_in_observed_trajectory` | Position coverage has no gaps over 5 s, and the nearest approach is outside the margin. |
-| `unassessable` | Nothing to compare. |
+| `reported_complete` | AnaTele received a `MISSION_ITEM_REACHED` for that sequence during the episode. |
+| `geometry_consistent_with_completion` | The nearest recorded position is within `WP_RADIUS_M` plus the GPS h_acc. This is *not* proof. |
+| `completion_not_observed` | No report. Also, there is no position coverage, or the item has no position (takeoff, RTL). |
+| `not_visited_in_observed_trajectory` | The position coverage has no gaps of more than 5 s, and the nearest approach is outside the margin. |
+| `unassessable` | There is no data for the comparison. |
 
 ## Firmware semantic packs
 
 `telemetry_platform/semantics/*.yaml`:
 
-- `ardupilot-common`: C-cast parameter encoding (validated for integrality and type range) and volatile counters (`STAT_*`) that are not reported as configuration changes.
-- `arducopter-4.7.2`: matched by version string *and*, when present, the git hash in `ArduCopter V4.7.2 (fb773567)`. A different hash is reported as a probable custom build. The pack holds parameter descriptions, bitmasks and crash-check semantics.
+- `ardupilot-common`: the C-cast encoding of parameters (validated for integer values and for the range of the type). It also has volatile counters (`STAT_*`). AnaTele does not report changes to these counters as configuration changes.
+- `arducopter-4.7.2`: AnaTele selects this pack from the version string. If the git hash is available, the hash must also match, for example `ArduCopter V4.7.2 (fb773567)`. AnaTele reports a different hash as a probable custom build. The pack contains parameter descriptions, bitmasks and crash-check semantics.
 
 ## Data-quality diagnostics
 
-Shown in the Limitations section of the manifest and in the web UI's diagnostics list:
+The Limitations section of the manifest and the diagnostics list in the web UI show these items:
 
 | Kind | Meaning |
 |---|---|
-| `invalid_frame` | MAVLink CRC or decoding failure. The frame is excluded and the parser resyncs. |
-| `recovered_span` / `unrecovered_tail` | Bytes skipped during resync. |
-| `truncated` | Incomplete final frame. The dataset is marked *partial*. |
-| `unknown_definition` / `unsupported_flags` | Excluded rather than trusted. |
-| `capture_clock_regression` / `possible_boot_reset` / `boot_counter_wrap` | Clock discontinuities that split the data into epochs. |
-| `incomplete_text` / `conflicting_text` | STATUSTEXT chunk reassembly problems. |
+| `invalid_frame` | MAVLink CRC or decoding failure. AnaTele excludes the frame, and the parser resyncs. |
+| `recovered_span` / `unrecovered_tail` | Bytes that AnaTele skipped during the resync. |
+| `truncated` | The final frame is incomplete. AnaTele marks the dataset as *partial*. |
+| `unknown_definition` / `unsupported_flags` | AnaTele excludes these items. It does not trust them. |
+| `capture_clock_regression` / `possible_boot_reset` / `boot_counter_wrap` | Clock discontinuities. They divide the data into epochs. |
+| `incomplete_text` / `conflicting_text` | Problems with the reassembly of STATUSTEXT chunks. |
 | `dataflash_tail` | DFReader stopped before the end of the file. |
-| `series_limit` | The in-memory derived-indicator cap was reached, so later samples were not assessed. |
+| `series_limit` | The data reached the memory limit for derived indicators. AnaTele did not examine the later samples. |
 
 ## Writing a rule
 
-1. Add an entry to `rules/core.yaml` using an existing detector type: `event_present`, `event_sequence`, `persistence`,
+1. Add an entry to `rules/core.yaml`. Use an existing detector type: `event_present`, `event_sequence`, `persistence`,
    `counter_increment`, `peak`, `motor_balance`, `coverage`, `parameter` or `profile_parameters`.
-2. Give it an `id`, an integer `version`, `severity`, `per` scope, `detail` / `detail_not_triggered` templates and `missing`.
-3. Add a synthetic test in `test_engine.py`, and if possible a simulator scenario that exercises it.
-4. Bump the pack `version`. Old analyses keep the pack hash they were produced with.
+2. Give the entry an `id`, an integer `version`, `severity`, `per` scope, `detail` / `detail_not_triggered` templates and `missing`.
+3. Add a synthetic test in `test_engine.py`.
+4. If possible, add a simulator scenario that tests the rule.
+5. Increase the `version` of the pack. Old analyses keep the pack hash that made them.
 
-Rules can't execute code. The loader rejects unknown detector types and duplicate ids.
+Rules cannot execute code. The loader rejects unknown detector types and duplicate ids.
 
 ## Known limitations
 
-- Telemetry is usually 2–10 Hz. Persistence below the sample interval is reported as unassessable.
-- No cross-file clock alignment yet (a tlog and a `.bin` are analysed separately).
-- No per-core EKF primary-lane tracking, ESC telemetry rules or PX4 ULog support.
-- Desired attitude in a tlog comes from NAV_CONTROLLER_OUTPUT, which may differ from the rate controller's target.
-- Hypothesis weights are uncalibrated. Treat the order as a prompt for which evidence to check first.
+- Telemetry is usually 2–10 Hz. If the persistence is shorter than the sample interval, AnaTele reports it as unassessable.
+- AnaTele does not yet align the clocks of different files. It analyses a tlog and a `.bin` separately.
+- AnaTele does not track the primary EKF lane for each core. It has no ESC telemetry rules and no PX4 ULog support.
+- In a tlog, the desired attitude comes from NAV_CONTROLLER_OUTPUT. This value can be different from the target of the rate controller.
+- The hypothesis weights are not calibrated. Use the sequence only to decide which evidence to examine first.

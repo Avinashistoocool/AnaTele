@@ -8,7 +8,7 @@
 - [Web UI and HTTP API](#web-ui-and-http-api)
 - [Sharing analyses (.ant)](#sharing-analyses-ant)
 - [Reports](#reports)
-- [Investigating a crash: a worked example](#investigating-a-crash-a-worked-example)
+- [Investigate a crash: a worked example](#investigate-a-crash-a-worked-example)
 - [Tips and troubleshooting](#tips-and-troubleshooting)
 
 ## Install
@@ -20,8 +20,8 @@ source .venv/bin/activate         # macOS / Linux
 pip install -e ".[desktop]"       # drop [desktop] for a headless/server install
 ```
 
-Python 3.11 or newer is required. You can also download a standalone build from
-[Releases](https://github.com/Avinashistoocool/AnaTele/releases), which needs no Python (see [DEPLOYMENT](DEPLOYMENT.md)).
+You must have Python 3.11 or newer. Alternatively, download a standalone build from
+[Releases](https://github.com/Avinashistoocool/AnaTele/releases). A standalone build does not need Python (refer to [DEPLOYMENT](DEPLOYMENT.md)).
 
 ## Desktop application
 
@@ -37,14 +37,14 @@ anatele path/to/flight.tlog      # import and analyse immediately
 | Region | Contents |
 |---|---|
 | **Menu** | File (Open Log or Analysis `Ctrl+O`, Save Analysis As .ant `Ctrl+S`, Export Report `Ctrl+E`, Show Original File), Analysis (Re-analyse with the selected profile, Refresh `F5`), Tools (Profile Editor, Compare With Log, Aircraft Trends), Help (Limitations). |
-| **Left: Recordings** | Each imported file shows its status and progress. Analysis runs in a separate worker process, so the window stays responsive. Failed files show the error. |
-| **Left: Profile** | The profile you select is attached to the *next* import (or re-analysis). Profiles are immutable and versioned. |
-| **Left: Episodes** | One row per armed episode, showing the phase status (`airborne reported`, `airborne inferred`, `no airborne evidence`, `unassessable`), takeoff time and crash-report time. Selecting an episode zooms the plots and replay to it. *All* shows the whole recording. |
-| **Centre: Plot** | Selected signals stacked by unit. Dashed lines mark armed, takeoff, crash report and disarmed; the shaded band is the pre-event airborne window. Gaps longer than 5 s are not drawn through. Click a point to open that record in the **Evidence** tab. |
-| **Right: X Axis** | Time from log start, or time from takeoff (for comparing flights). |
-| **Right: Y Axis** | Every decoded or derived signal for the selected source. Use the filter box, e.g. `vibration`, `motor.`, `ekf`. |
-| **Bottom tabs** | Findings · Hypotheses · Rules · Flight Path · Events · Parameters · Missions · Evidence. Double-click any row to see its evidence. |
-| **Flight Statistics** | Firmware and semantic pack, frame, record count, takeoff, airborne time, crash report, pre-event vibration, EKF compass ratio, tilt error, motor spread, battery monitoring and top hypothesis. |
+| **Left: Recordings** | Each imported file shows its status and progress. The analysis runs in a separate worker process, thus the window continues to respond. A failed file shows the error. |
+| **Left: Profile** | AnaTele attaches the profile that you select to the *next* import (or re-analysis). You cannot change a profile after you save it. Each profile has a version. |
+| **Left: Episodes** | One row for each armed episode. The row shows the phase status (`airborne reported`, `airborne inferred`, `no airborne evidence`, `unassessable`), the takeoff time and the time of the crash report. When you select an episode, the plots and the replay zoom to it. *All* shows the full recording. |
+| **Centre: Plot** | The selected signals, stacked by unit. Dashed lines mark armed, takeoff, crash report and disarmed. The shaded band is the airborne window before the event. AnaTele does not draw a line across a gap of more than 5 s. Click a point to open its record in the **Evidence** tab. |
+| **Right: X Axis** | Time from the start of the log, or time from takeoff (to compare flights). |
+| **Right: Y Axis** | All decoded or derived signals for the selected source. To find a signal, type in the filter box, for example `vibration`, `motor.`, `ekf`. |
+| **Bottom tabs** | Findings · Hypotheses · Rules · Flight Path · Events · Parameters · Missions · Evidence. To see the evidence for a row, double-click the row. |
+| **Flight Statistics** | Firmware and semantic pack, frame, record count, takeoff, airborne time and crash report. Also vibration before the event, EKF compass ratio, tilt error, motor spread, battery monitoring and the first hypothesis. |
 
 ### Useful signals
 
@@ -52,33 +52,33 @@ anatele path/to/flight.tlog      # import and analyse immediately
 |---|---|
 | `attitude.roll_deg`, `attitude.pitch_deg`, `attitude.yaw_deg` | Estimated attitude |
 | `attitude.desired_roll_deg`, `attitude.desired_pitch_deg` | Controller target (NAV_CONTROLLER_OUTPUT, ATTITUDE_TARGET or ATT Des*) |
-| `control.tilt_tracking_error_deg` | Angle between desired and estimated thrust vectors (derived) |
+| `control.tilt_tracking_error_deg` | Angle between the desired and the estimated thrust vectors (derived) |
 | `control.throttle_pct` | Throttle output (VFR_HUD or CTUN) |
 | `output.chN` | Raw servo/ESC PWM |
-| `motor.N.output_frac`, `motor.N.at_floor`, `motor.N.at_ceiling` | Motor command mapped via `SERVOn_FUNCTION` and normalised to the PWM range (derived) |
+| `motor.N.output_frac`, `motor.N.at_floor`, `motor.N.at_ceiling` | Motor command, mapped through `SERVOn_FUNCTION` and normalised to the PWM range (derived) |
 | `motor.mix.right_minus_left`, `front_minus_back`, `ccw_minus_cw` | Mixer decomposition of the motor commands (derived) |
 | `imu.N.vibration.{x,y,z}`, `imu.N.clipping_counter` | Vibration and clipping |
 | `ekf.compass_ratio`, `ekf.velocity_ratio`, `ekf.core*.…` | EKF innovation test ratios |
 | `gps.fix_type`, `gps.h_acc_m` | GPS quality |
 | `position.altitude_home`, `position.latitude`, `position.longitude` | Estimated position |
-| `battery.voltage`, `battery.current` | Only when a monitor reports non-zero values |
+| `battery.voltage`, `battery.current` | Only when a monitor reports values that are not zero |
 
 ### Flight Path tab
 
 ![Flight path](images/desktop_flight_path.png)
 
-- The 3D path shows the recorded estimated position in metres east/north/up, relative to the first fix of the episode.
-- The **path colour** shows the flight mode (AUTO, RTL, LAND …). The grey line is the ground shadow.
-- **Waypoint colours:** green = reported complete, yellow-green = within radius plus GPS accuracy, amber = completion not observed, red = not visited.
+- The 3D path shows the recorded estimated position in metres east/north/up. The origin is the first fix of the episode.
+- The **path colour** shows the flight mode (AUTO, RTL, LAND …). The grey line is the shadow on the ground.
+- **Waypoint colours:** green = reported complete, yellow-green = in the radius plus the GPS accuracy, amber = completion not observed, red = not visited.
 - **X markers:** takeoff, attitude excursion, crash report and disarmed.
-- **Play** animates the aircraft; the red arms are the front. Drag with the mouse to rotate the view.
-- **Export GIF…** saves an animation, or a still image if you choose `.png`.
+- **Play** shows an animation of the aircraft. The red arms are the front. To turn the view, drag with the mouse.
+- **Export GIF…** saves an animation. If you select `.png`, it saves a still image.
 
-### Comparing and trending
+### Comparisons and trends
 
-- **Parameters tab → Compare against → Diff:** typed differences against another log or the attached profile. Raw-only differences (unverified encoding) are listed separately.
-- **Tools → Compare With Log:** metrics from the pre-event airborne window side by side, rule states and the parameter diff.
-- **Tools → Aircraft Trends:** every analysed flight uploaded with a profile of that aircraft key, with a chart of vibration, compass ratio and motor spread over time.
+- **Parameters tab → Compare against → Diff:** typed differences against a different log or the attached profile. AnaTele shows the raw-only differences (unverified encoding) in a separate list.
+- **Tools → Compare With Log:** the metrics from the airborne window before the event, side by side, with the rule states and the parameter diff.
+- **Tools → Aircraft Trends:** all analysed flights that you uploaded with a profile of that aircraft key. A chart shows vibration, compass ratio and motor spread over time.
 
 ## Command line
 
@@ -117,17 +117,17 @@ anatele simulate --out simulations                  # all five scenarios
 anatele simulate --scenario compass_interference --out compass.tlog --seed 7
 ```
 
-| Scenario | What happens | What AnaTele should show |
+| Scenario | Events in the flight | Expected result in AnaTele |
 |---|---|---|
-| `nominal` | Arm, AUTO takeoff, 4 waypoints, RTL, land | No critical findings; all waypoints `reported_complete` |
-| `motor_failure` | Motor 3's thrust degrades mid-mission until the controller saturates and the crash check disarms | Tracking loss, motor ceiling and imbalance, thrust hypothesis ranked first; later waypoints not visited |
-| `compass_interference` | Motor current corrupts the magnetometer, causing yaw error, toilet-bowling during RTL and a compass switch | EKF compass ratio above 1 pre-event, compass-selection event, circling path in the replay |
-| `vibration` | Damaged propeller | Sustained vibration above 30 m/s², clipping increments before the event |
-| `radio_failsafe` | PreArm radio warnings, then RC loss mid-mission and RTL | PreArm radio finding, RTL mode change, waypoints after the loss not visited |
+| `nominal` | Arm, AUTO takeoff, 4 waypoints, RTL, land | No critical findings. All waypoints are `reported_complete`. |
+| `motor_failure` | The thrust of motor 3 decreases during the mission. Then the controller saturates and the crash check disarms. | Loss of tracking, motor ceiling and imbalance. The thrust hypothesis is first. The later waypoints are not visited. |
+| `compass_interference` | The motor current corrupts the magnetometer. This causes yaw error, a circular "toilet-bowl" movement during RTL and a compass switch. | EKF compass ratio more than 1 before the event, a compass-selection event, and a circular path in the replay |
+| `vibration` | Damaged propeller | Persistent vibration of more than 30 m/s², and clipping increments before the event |
+| `radio_failsafe` | PreArm radio warnings, then RC loss during the mission and RTL | PreArm radio finding, RTL mode change. The waypoints after the loss are not visited. |
 
-The physics is deliberately simple: a rigid quad, an ArduPilot-style roll/pitch-over-yaw mixer priority, linear drag
-and wind. Output is labelled `SIMULATED FLIGHT` inside the log and is located at the public SITL default field.
-Use it to learn the tool, test rules and reproduce patterns. It does not prove anything about a real aircraft.
+The physics is intentionally simple: a rigid quad, an ArduPilot-style mixer priority (roll/pitch before yaw), linear drag
+and wind. The log contains the label `SIMULATED FLIGHT`. The location is the public default field of SITL.
+Use the simulator to learn the tool, to test rules and to make patterns again. It does not prove anything about a real aircraft.
 
 ## Aircraft profiles
 
@@ -135,12 +135,12 @@ Use it to learn the tool, test rules and reproduce patterns. It does not prove a
 
 | Field | Use |
 |---|---|
-| Aircraft key | Stable id such as `quad-01`. Saving again creates version 2, 3, … |
-| Name, frame, firmware, notes | Operator declarations, shown in reports. They are not verified against the binary. |
-| Vibration screening | Threshold used by the vibration rules (default 30 m/s²) |
-| Expected parameters | `NAME=value` per line. Checked by `profile-parameter-mismatch` and the parameter diff. |
+| Aircraft key | A stable id, for example `quad-01`. When you save again, AnaTele makes version 2, 3, … |
+| Name, frame, firmware, notes | Declarations from the operator. The reports show them. AnaTele does not verify them against the binary. |
+| Vibration screening | The threshold for the vibration rules (default 30 m/s²) |
+| Expected parameters | One `NAME=value` on each line. `profile-parameter-mismatch` and the parameter diff examine these values. |
 
-Attach the profile *before* importing. Existing analyses are never rewritten; use **Analysis → Re-analyse**.
+Attach the profile *before* you import the log. AnaTele never writes over an existing analysis. To analyse again, use **Analysis → Re-analyse**.
 
 ## Web UI and HTTP API
 
@@ -148,7 +148,7 @@ Attach the profile *before* importing. Existing analyses are never rewritten; us
 anatele web            # http://127.0.0.1:8766
 ```
 
-The web UI has the same analysis with a simpler layout. OpenAPI docs are at `/docs`. Main endpoints:
+The web UI gives the same analysis with a simpler layout. The OpenAPI documentation is at `/docs`. The main endpoints are:
 
 ```text
 POST /api/logs                              multipart file (+ profile_id)
@@ -171,65 +171,82 @@ POST /api/profiles | GET /api/profiles
 
 ## Reports
 
-**File → Export Report** (or `/api/logs/{id}/report`) writes a self-contained HTML file with the file hash,
-engine/rule/semantic versions, phases, ranked hypotheses, findings with evidence ids, the full rule-coverage
-table, mission item statuses and limitations. Print it to PDF from a browser.
+**File → Export Report** (or `/api/logs/{id}/report`) writes one HTML file that contains all of its content. The report contains:
+
+- the file hash;
+- the engine, rule and semantic versions;
+- the phases and the hypotheses in sequence;
+- the findings with evidence ids;
+- the full table of rule coverage;
+- the mission item statuses and the limitations.
+
+To make a PDF, print the report from a browser.
 
 ## Sharing analyses (.ant)
 
-An **`.ant`** file (*ANalysed Telemetry*) is a finished AnaTele analysis that someone else can open without
-re-running anything: findings, ranked hypotheses, rule coverage, phases, missions, flight statistics, every
-plot and the 3D flight path.
+An **`.ant`** file (*ANalysed Telemetry*) is a complete AnaTele analysis. A different person can open it without
+a new analysis. It contains the findings, the hypotheses in sequence, the rule coverage, the phases, the missions, the flight statistics, all
+plots and the 3D flight path.
 
-| How | Save | Open |
+| Method | Save | Open |
 |---|---|---|
 | Desktop | **File → Save Analysis As (.ant)** `Ctrl+S` | **File → Open** `Ctrl+O`, or `anatele shared.ant` |
-| Web | *Save analysis (.ant)* link above the results | Choose the `.ant` in the upload box |
+| Web | The *Save analysis (.ant)* link above the results | Select the `.ant` in the upload box |
 | CLI | `anatele export LOG -o flight.ant` | `anatele analyse flight.ant` |
 
-When saving you choose:
+When you save, you select one of these options:
 
-- **Analysis only** (default): smaller. The recipient sees decoded records but not raw bytes, and cannot re-analyse.
-- **Include original log**: embeds the untouched log so the recipient can view raw bytes and re-analyse with a newer engine or their own profile.
+- **Analysis only** (default): a smaller file. The recipient sees the decoded records, but not the raw bytes. The recipient cannot analyse the log again.
+- **Include original log**: the file contains the unchanged log. The recipient can see the raw bytes. The recipient can also analyse the log again with a newer engine or with a different profile.
 
-Both contain **GPS positions and timestamps** of the flight. Share only with people you trust.
+> **CAUTION:** Share `.ant` files only with persons that you trust. Both options contain the **GPS positions and timestamps** of the flight.
 
-**What's inside.** An `.ant` is a ZIP container (like `.docx`), so `unzip -l flight.ant` works:
+**Contents.** An `.ant` file is a ZIP container (similar to `.docx`). Thus, `unzip -l flight.ant` shows the contents:
 
 | Entry | Contents |
 |---|---|
 | `mimetype` | `application/vnd.anatele.analysis+zip` (first, uncompressed) |
-| `meta.json` | Format version, AnaTele/engine/rule-pack versions, original filename/size/SHA-256, profile snapshot, SHA-256 of every entry |
+| `meta.json` | Format version, AnaTele/engine/rule-pack versions, original filename/size/SHA-256, profile snapshot, SHA-256 of each entry |
 | `manifest.json` | The full analysis result |
 | `observations.parquet`, `signals.parquet` | Decoded records and normalised signals |
-| `report.html` | The printable report, readable without AnaTele |
+| `report.html` | The printable report. You can read it without AnaTele. |
 | `original.tlog` / `.bin` / `.log` / `.csv` | Only with *Include original log* |
 
-**Safety.** Opening an `.ant` never runs analysis or code from the file. AnaTele accepts only the entries above,
-caps sizes while extracting (1 GiB file, 768 MiB per Parquet, 100 MiB original), rejects encrypted entries, and
-verifies every SHA-256 and the Parquet schema before registering it. Altered or damaged files are refused.
-Hashes prove the content is internally consistent, not who made it. An imported analysis shows *shared analysis
-from …* in the report and status line, and keeps the engine version it was produced with.
+**Safety.** When AnaTele opens an `.ant` file, it never runs an analysis or code from the file. AnaTele does these checks:
 
-## Investigating a crash: a worked example
+- It accepts only the entries in the table above.
+- It sets size limits during extraction: 1 GiB for the file, 768 MiB for each Parquet, 100 MiB for the original.
+- It does not accept encrypted entries.
+- It verifies each SHA-256 and the Parquet schema before it registers the file.
 
-1. Import the log with the aircraft's profile attached.
-2. Check **Flight Statistics**: was the firmware matched? Is battery monitoring present? Was takeoff reported or inferred?
-3. In **Episodes**, select the crash episode. Plot roll, pitch and `control.tilt_tracking_error_deg`. When did tracking first diverge, relative to the shaded pre-event window?
-4. Add `motor.*.output_frac`. Did one motor go to ceiling or floor first? Is the imbalance mostly in yaw (`motor.mix.ccw_minus_cw`)?
-5. Add `ekf.compass_ratio` and `imu.0.vibration.z`. Were they elevated *before* the upset, or only at impact?
-6. Read **Hypotheses**. Each one lists its supporting and contradicting rules and the observation that would separate it from the others.
-7. Open **Flight Path** to see where the upset began relative to the mission, and which waypoints were reached.
-8. Export the report. Follow up with the onboard `.bin` log and a safe, props-off inspection; don't fly another Auto mission.
+AnaTele does not accept changed or damaged files.
+The hashes prove that the content agrees with itself. They do not prove the identity of the person who made the file. For an imported analysis, the report and the status line show *shared analysis
+from …*. The analysis keeps the engine version that made it.
+
+## Investigate a crash: a worked example
+
+1. Import the log with the profile of the aircraft attached.
+2. Examine **Flight Statistics**. Did the firmware match? Is battery monitoring available? Was the takeoff reported or inferred?
+3. In **Episodes**, select the crash episode.
+4. Plot roll, pitch and `control.tilt_tracking_error_deg`. Find the time when tracking first diverged. Compare this time with the shaded window before the event.
+5. Add `motor.*.output_frac`. Did one motor go to the ceiling or to the floor first? Is the imbalance mostly in yaw (`motor.mix.ccw_minus_cw`)?
+6. Add `ekf.compass_ratio` and `imu.0.vibration.z`. Were the values high *before* the upset, or only at impact?
+7. Read **Hypotheses**. Each hypothesis shows its supporting and contradicting rules. It also shows the observation that makes it different from the other hypotheses.
+8. Open **Flight Path**. Find where the upset started in the mission, and which waypoints the aircraft reached.
+9. Export the report.
+10. Examine the onboard `.bin` log.
+11. Do a safe inspection with the propellers removed.
+
+> **WARNING:** Do not fly a new Auto mission before you complete the investigation. The cause of the crash is possibly not corrected.
 
 ## Tips and troubleshooting
 
 | Symptom | Explanation |
 |---|---|
-| `airborne inferred` instead of `reported` | The capture has no EXTENDED_SYS_STATE. Takeoff was inferred from altitude rise with demand. |
-| Many rules `unassessable` | The needed messages weren't streamed or recorded, or the sample rate is too low for the persistence criterion. Use the onboard `.bin` log. |
-| Parameters shown as `raw … (unverified)` | The integer encoding couldn't be confirmed (non-ArduPilot autopilot, or capabilities missing). |
-| `Power-related causes cannot be assessed` | `SYS_STATUS` reported 0 V, meaning no battery monitor is configured. |
-| Older analyses lack phases and rules | They were made with an earlier engine. Use **Analysis → Re-analyse**. |
-| Analysis stopped after 180 s | The file is too large for the local deadline. Split it, or raise `TIMEOUT_SECONDS` in `worker.py`. |
-| Where is my data? | See [DEPLOYMENT → Data directory](DEPLOYMENT.md#data-directory). |
+| `airborne inferred` instead of `reported` | The capture has no EXTENDED_SYS_STATE. AnaTele inferred the takeoff from an increase in altitude together with demand. |
+| Many rules are `unassessable` | The log does not contain the necessary messages, or the sample rate is too low for the persistence criterion. Use the onboard `.bin` log. |
+| Parameters show as `raw … (unverified)` | AnaTele could not confirm the integer encoding (the autopilot is not ArduPilot, or capabilities are missing). |
+| `Power-related causes cannot be assessed` | `SYS_STATUS` reported 0 V. This means that no battery monitor is configured. |
+| Older analyses have no phases and rules | An earlier engine made them. Use **Analysis → Re-analyse**. |
+| The analysis stopped after 180 s | The file is too large for the local deadline. Divide the file, or increase `TIMEOUT_SECONDS` in `worker.py`. |
+| Where is my data? | Refer to [DEPLOYMENT → Data directory](DEPLOYMENT.md#data-directory). |

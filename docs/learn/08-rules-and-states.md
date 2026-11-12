@@ -2,22 +2,22 @@
 
 ## What a rule is
 
-A rule is a small, versioned, written-down check: "if *this signal* stays above *this threshold* for *this long*,
-during *this phase*, report it". All rules live in one file, the **rule pack** (`telemetry_platform/rules/core.yaml`).
-Every report records which pack version and SHA-256 it used, so the same log always gives the same answer.
+A rule is a small, written check with a version. An example: "if *this signal* stays above *this threshold* for *this period*,
+during *this phase*, report it". All rules are in one file, the **rule pack** (`telemetry_platform/rules/core.yaml`).
+Each report records the pack version and the SHA-256 that it used. Thus, the same log always gives the same answer.
 
-## Persistence: ignore blips, catch trends
+## Persistence: ignore short peaks, find trends
 
 ![Persistence](../images/guide/22_persistence_rule.png)
 
-Real signals are noisy. A single spike is usually meaningless, so most rules need a **run**: consecutive samples
-above the threshold, lasting at least `for_s` seconds. Two more details:
+Real signals have noise. Usually, one peak has no meaning. Thus, most rules need a **run**: sequential samples
+above the threshold, for a minimum of `for_s` seconds. Two more details apply:
 
-- If two samples are too far apart (more than the **maximum gap**), the run is broken. AnaTele doesn't assume what
-  happened in between.
-- A run's length is measured from its **first to its last** sample above the threshold.
+- If the interval between two samples is too long (more than the **maximum gap**), the run stops. AnaTele does not guess what
+  occurred between the samples.
+- AnaTele measures the length of a run from its **first sample to its last sample** above the threshold.
 
-Try it, including what happens when data gets sparse:
+Try the widget. Also look at the result when the data becomes sparse:
 
 <div class="anatele-widget" data-widget="persistence"></div>
 
@@ -27,20 +27,20 @@ Try it, including what happens when data gets sparse:
 
 | State | Meaning |
 |---|---|
-| **triggered** | The data is there and the condition was met. |
-| **not triggered** | The data is there and the condition was *not* met. |
-| **unassessable** | The data needed is missing, or too sparse to decide. **Not the same as healthy.** |
-| **not applicable** | The rule doesn't apply here, e.g. a profile check when no profile was selected. |
+| **triggered** | The data is available, and the condition occurred. |
+| **not triggered** | The data is available, and the condition did *not* occur. |
+| **unassessable** | The necessary data is missing, or it is too sparse for a decision. **This is not the same as healthy.** |
+| **not applicable** | The rule does not apply here, for example a profile check when you did not select a profile. |
 
-Here are real examples from the simulated flights:
+These are real examples from the simulated flights:
 
 ![Four states examples](../images/guide/32_four_states_examples.png)
 
 !!! warning "Unknown is never healthy"
-    Many tools show a green tick when a check *couldn't run*. AnaTele never does. If a log has no vibration data,
-    the vibration rules say **unassessable**, and any hypothesis that depends on them says so too.
+    Many tools show a green tick when a check *could not run*. AnaTele never does this. If a log has no vibration data,
+    the vibration rules give **unassessable**. Each hypothesis that uses these rules also tells you this.
 
-## Counting the five simulated flights
+## Results of the five simulated flights
 
 | Flight | triggered | not triggered | not applicable |
 |---|---|---|---|
@@ -50,6 +50,6 @@ Here are real examples from the simulated flights:
 | vibration | 5 | 15 | 2 |
 | radio_failsafe | 2 | 18 | 2 |
 
-The one rule that triggers even in the nominal flight is `fs-gcs-disabled`. It's a configuration observation
-(the ground-station failsafe is turned off), not a fault. That's why rules have **severities** and are kept
+The only rule that triggers in the nominal flight is `fs-gcs-disabled`. It is an observation about the configuration
+(the ground-station failsafe is off). It is not a fault. For this reason, rules have **severities**, and AnaTele keeps them
 separate from **hypotheses**.

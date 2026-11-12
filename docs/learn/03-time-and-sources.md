@@ -2,45 +2,44 @@
 
 ## Two clocks
 
-Every record in a log has a time, but not always from the same clock.
+Each record in a log has a time, but the time does not always come from the same clock.
 
 ![Time bases](../images/guide/07_time_bases.png)
 
-- **Capture time**: when the ground station received the message (the 8-byte stamp in front of each `.tlog`
-  record). It's wall-clock time, so it can jump if the PC's clock is adjusted, and it includes radio delay.
-- **Boot time** (`time_boot_ms`, `time_usec`): how long the flight controller has been powered on. It's
-  precise, but it **restarts from zero** when the board reboots.
+- **Capture time**: the time when the ground station received the message (the 8-byte stamp in front of each `.tlog`
+  record). It is wall-clock time. Thus, it can jump if a person adjusts the clock of the PC. It also includes the radio delay.
+- **Boot time** (`time_boot_ms`, `time_usec`): the time since the flight controller got power. It is
+  precise, but it **starts again from zero** when the board reboots.
 
 ## Epochs
 
-If the board reboots mid-log, "10 s after boot" happens twice. Put both runs on one timeline and you'd mix two
-different flights. AnaTele avoids this by splitting the log into **epochs**. A new epoch starts whenever a clock
-clearly goes backwards. Inside one epoch, time only moves forward, so samples can be ordered, paired and compared
-safely.
+If the board reboots during the log, "10 s after boot" occurs two times. If you put the two runs on one timeline, you mix two
+different flights. AnaTele prevents this. It divides the log into **epochs**. A new epoch starts each time that a clock
+clearly goes back. In one epoch, time only moves forward. Thus, AnaTele can safely put samples in sequence, pair them and compare them.
 
-The exact tests (per source) are:
+These are the exact tests (for each source):
 
-| Clock | New epoch when… | Why the margin |
+| Clock | New epoch when… | Reason for the margin |
 |---|---|---|
-| `.tlog` boot time `time_boot_ms` | it drops by more than **10 s** | Small regressions are just reordered / delayed packets |
-| DataFlash boot time | it drops by more than **1 s** | On-board records are written in order |
-| `.tlog` capture time | it drops by more than **2 s** | PC clock adjustments separate the whole capture |
+| `.tlog` boot time `time_boot_ms` | it decreases by more than **10 s** | Small decreases come from packets that are delayed or in a different sequence |
+| DataFlash boot time | it decreases by more than **1 s** | The board writes on-board records in sequence |
+| `.tlog` capture time | it decreases by more than **2 s** | Adjustments of the PC clock divide the full capture |
 
-A boot-time drop from near $2^{32}$ ms back to near zero is recognised as a counter **wrap** (after ~49.7 days),
-not a reboot. Every epoch split is listed as a diagnostic, so you can see why it happened.
+AnaTele identifies a decrease of boot time from near $2^{32}$ ms to near zero as a counter **wrap** (after ~49.7 days).
+It is not a reboot. AnaTele shows each epoch division as a diagnostic, thus you can see its cause.
 
 ## Sources
 
-A capture can hold messages from more than one system: the drone, a gimbal, the ground station, a companion
-computer. MAVLink identifies each sender by a *system id* and *component id*. AnaTele calls each pair a
-**source** (for example `1:1` is the autopilot) and never mixes signals from different sources.
+A capture can contain messages from more than one system: the drone, a gimbal, the ground station, a companion
+computer. MAVLink identifies each sender with a *system id* and a *component id*. AnaTele calls each pair a
+**source** (for example, `1:1` is the autopilot). It never mixes signals from different sources.
 
 ## Pairing samples
 
-Many checks compare two signals, for example desired and actual roll. They don't arrive at exactly the same
-instant, so AnaTele pairs each sample with the **nearest** sample of the other signal, within a tolerance. For
-attitude that tolerance is **0.25 s**. If no partner is close enough, the pair is skipped rather than guessed.
+Many checks compare two signals, for example the desired roll and the actual roll. The samples do not arrive at exactly the same
+time. Thus, AnaTele pairs each sample with the **nearest** sample of the other signal, within a tolerance. For
+attitude, the tolerance is **0.25 s**. If no sample is sufficiently near, AnaTele skips the pair. It does not guess.
 
 !!! note "Design principle"
-    Nothing is interpolated or invented. A derived value always comes from real samples, close enough in time to
-    be compared, and it keeps a link to the record it came from.
+    AnaTele does not interpolate or invent data. A derived value always comes from real samples that are sufficiently near in time for
+    a comparison. The value keeps a link to its record.

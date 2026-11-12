@@ -6,30 +6,29 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
 </p>
 
-**Evidence-first drone flight-log investigation.** AnaTele reads ArduPilot logs (Mission Planner `.tlog`,
-DataFlash `.bin`/`.log`) and turns them into a reproducible investigation:
+**Evidence-first investigation of drone flight logs.** AnaTele reads ArduPilot logs (Mission Planner `.tlog`,
+DataFlash `.bin`/`.log`). It changes them into an investigation that you can do again with the same result:
 
-- **What happened?** A timeline built from reports in the log, armed episodes and flight phases (takeoff, pre-event window, upset, disarm).
-- **Where did it go?** A 3D replay of the recorded path with the mission waypoints and their completion status.
-- **What looks wrong?** A versioned, declarative rule pack. Each rule reports *triggered*, *not triggered*, *unassessable* or *not applicable*.
-- **Why might it have happened?** Competing hypotheses ranked by the evidence for and against each one, plus the data that would tell them apart.
-- **Can I check it?** Every claim links back to the original record and its raw bytes.
+- **What occurred?** A timeline from the reports in the log, the armed episodes and the flight phases (takeoff, pre-event window, upset, disarm).
+- **Where did the aircraft go?** A 3D replay of the recorded path, with the mission waypoints and their completion status.
+- **What is possibly wrong?** A declarative rule pack with versions. Each rule reports *triggered*, *not triggered*, *unassessable* or *not applicable*.
+- **What are the possible causes?** Competing hypotheses, in a sequence that agrees with the evidence for and against each one. AnaTele also shows the data that can tell the hypotheses apart.
+- **Can I examine the claims?** Each claim has a link to the original record and its raw bytes.
 
-It also includes a **flight simulator** that generates realistic synthetic crashes and faults. You can try every
-feature without a real log.
+AnaTele also contains a **flight simulator**. The simulator makes realistic synthetic crashes and faults. Thus, you can try all of the features without a real log.
 
 ![Desktop app: findings, hypotheses and stacked signal plots for a simulated motor failure](docs/images/desktop_overview.png)
 
 <p align="center"><img src="docs/images/replay_motor_failure.gif" width="560" alt="3D replay of a simulated motor failure"></p>
 
-> AnaTele gives you observations and hypotheses. It is **not** a crash verdict, a probability of cause or an
-> airworthiness approval. Missing data is treated as *unknown*, never as *healthy*.
+> AnaTele gives you observations and hypotheses. It does **not** give a crash verdict, a probability of cause or an
+> airworthiness approval. AnaTele records missing data as *unknown*. It never records missing data as *healthy*.
 
 ---
 
 ## Download
 
-No Python needed. Grab the build for your OS from the [latest release](https://github.com/Avinashistoocool/AnaTele/releases/latest):
+You do not need Python. Get the build for your operating system (OS) from the [latest release](https://github.com/Avinashistoocool/AnaTele/releases/latest):
 
 | OS | Download | Run |
 |---|---|---|
@@ -37,8 +36,9 @@ No Python needed. Grab the build for your OS from the [latest release](https://g
 | macOS | [AnaTele-macos.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-macos.zip) | Extract → right-click `AnaTele` → *Open* |
 | Linux | [AnaTele-linux.zip](https://github.com/Avinashistoocool/AnaTele/releases/latest/download/AnaTele-linux.zip) | Extract → `./AnaTele/AnaTele` |
 
-Each zip includes five simulated flights in `simulations/`. Open `sim_motor_failure.tlog` to try it.
-The builds are not code-signed, so your OS may warn you the first time you run them. To check that a download is genuine:
+Each zip file contains five simulated flights in `simulations/`. To try AnaTele, open `sim_motor_failure.tlog`.
+
+The builds do not have a code signature. Thus, your OS can show a warning when you run them for the first time. To make sure that a download is genuine, do one of these checks:
 
 ```bash
 # compare with SHA256SUMS.txt attached to the release
@@ -60,7 +60,7 @@ anatele simulate --out simulations      # five synthetic flights (nominal + four
 anatele simulations/sim_motor_failure.tlog
 ```
 
-This opens the desktop application with the simulated motor failure loaded. Prefer the terminal?
+These commands open the desktop application with the simulated motor failure. To use the terminal, use these commands:
 
 ```bash
 anatele analyse simulations/sim_motor_failure.tlog
@@ -70,36 +70,50 @@ anatele export  simulations/sim_motor_failure.tlog -o motor_failure.ant   # shar
 
 ## What's inside
 
-| Area | What it does |
+| Area | Function |
 |---|---|
-| **Ingestion** | Mission Planner tlog (timestamp-prefixed MAVLink 1/2 with CRC validation and resync), DataFlash binary/text, mapped CSV. Immutable originals with a SHA-256, parser version and corruption diagnostics. |
-| **Sources & clocks** | Separates vehicle, ground-station and radio sources (a GCS heartbeat never arms the vehicle). Splits capture time from boot time, handles clock epochs and reboots, and reassembles chunked STATUSTEXT messages. |
-| **Flight phases** | Uses reported landed state when available. Otherwise infers takeoff from home-relative altitude rise with throttle or motor demand, and labels it as inferred. Also marks attitude-excursion onset and a pre-event window. |
-| **Diagnostics** | 20 rules in `telemetry_platform/rules/core.yaml`: crash-check, compass and EKF sequence, vibration persistence (>30 m/s² for 2 s, >60 m/s² for 1 s), clipping before the event versus at impact, tilt tracking error, motor floor/ceiling saturation and imbalance (with frame mixer decomposition), power-monitoring gaps, pre-arm and arming rejections, GPS configuration, parameter reviews and profile mismatch. |
-| **Hypotheses** | Estimator/magnetic, thrust or configuration, vibration and power. Each gets capped support per evidence family minus explicit contradictions. Labels range from *strong support* to *unassessable*, and no probabilities are given. |
-| **Firmware semantics** | Versioned packs (`semantics/*.yaml`). ArduCopter 4.7.2 meanings are tied to the official git hash, and the C-cast parameter decoding is validated against the declared type. |
-| **Missions** | Upload, download, partial-write and clear transactions, broadcast ACKs, retransmits and restarts. Plan versions carry a confidence level. Each item gets a status of `reported_complete`, `geometry_consistent_with_completion`, `completion_not_observed`, `not_visited_in_observed_trajectory` or `unassessable`, using `WP_RADIUS_M` and GPS accuracy. |
-| **Flight path** | Interactive 3D replay: path coloured by flight mode, waypoint status, takeoff/upset/crash markers and a live aircraft attitude glyph. Exports to GIF or PNG. Coordinates are local metres, so screenshots don't reveal your field. |
-| **Comparison** | Parameter diff (log vs log, or log vs profile), side-by-side flights aligned by phase, and per-aircraft trends. |
-| **Simulator** | Quad physics with an ArduPilot-like mixer, waypoint guidance, wind, crash check and failsafes. Scenarios: `nominal`, `motor_failure`, `compass_interference`, `vibration`, `radio_failsafe`. |
-| **Sharing** | Save any analysis as a single **`.ant`** file (*ANalysed Telemetry*) that opens straight into AnaTele with findings, plots and flight path. Optionally embeds the original log. Hash-verified on open. See [Sharing analyses](docs/USAGE.md#sharing-analyses-ant). |
-| **Interfaces** | Desktop app (PySide6 + matplotlib), local web UI and API (FastAPI), CLI, and an HTML report. |
+| **Ingestion** | Mission Planner tlog (MAVLink 1/2 with a timestamp prefix, CRC validation and resync), DataFlash binary/text, and mapped CSV. AnaTele keeps the originals without change, with a SHA-256, the parser version and the diagnostics for corruption. |
+| **Sources & clocks** | AnaTele keeps the vehicle, ground-station and radio sources separate (a GCS heartbeat never arms the vehicle). It keeps capture time and boot time separate, and it processes clock epochs and reboots. It also assembles STATUSTEXT messages that arrive in chunks. |
+| **Flight phases** | AnaTele uses the reported landed state when it is available. If not, it infers takeoff from an increase of the altitude above home together with throttle or motor demand. It labels this result as inferred. It also marks the start of an attitude excursion and a pre-event window. |
+| **Diagnostics** | 20 rules in `telemetry_platform/rules/core.yaml`. The rules examine crash-check, the sequence of compass and EKF events, and persistent vibration (>30 m/s² for 2 s, >60 m/s² for 1 s). They compare clipping before the event with clipping at impact, and they examine tilt tracking error. They also examine motor floor/ceiling saturation and imbalance (with decomposition of the frame mixer) and gaps in power monitoring. Other rules examine pre-arm and arming rejections, GPS configuration, parameter reviews and profile mismatch. |
+| **Hypotheses** | Estimator/magnetic, thrust or configuration, vibration and power. Each hypothesis gets support with a limit for each evidence family, minus explicit contradictions. The labels go from *strong support* to *unassessable*. AnaTele gives no probabilities. |
+| **Firmware semantics** | Packs with versions (`semantics/*.yaml`). The ArduCopter 4.7.2 meanings agree with the official git hash. AnaTele validates the C-cast decoding of parameters against the declared type. |
+| **Missions** | Upload, download, partial-write and clear transactions, broadcast ACKs, retransmits and restarts. Each plan version has a confidence level. Each item gets one status: `reported_complete`, `geometry_consistent_with_completion`, `completion_not_observed`, `not_visited_in_observed_trajectory` or `unassessable`. The status uses `WP_RADIUS_M` and the GPS accuracy. |
+| **Flight path** | Interactive 3D replay. It shows the path with a colour for each flight mode, the waypoint status, takeoff/upset/crash markers and a live glyph of the aircraft attitude. It exports to GIF or PNG. The coordinates are local metres, thus screenshots do not show the location of your field. |
+| **Comparison** | Parameter diff (log compared with log, or log compared with profile), flights side by side and aligned by phase, and trends for each aircraft. |
+| **Simulator** | Quad physics with a mixer similar to ArduPilot, waypoint guidance, wind, crash check and failsafes. Scenarios: `nominal`, `motor_failure`, `compass_interference`, `vibration`, `radio_failsafe`. |
+| **Sharing** | You can save each analysis as one **`.ant`** file (*ANalysed Telemetry*). The file opens directly in AnaTele with the findings, the plots and the flight path. Optionally, it contains the original log. AnaTele verifies the hash when it opens the file. Refer to [Sharing analyses](docs/USAGE.md#sharing-analyses-ant). |
+| **Interfaces** | Desktop app (PySide6 + matplotlib), local web UI and API (FastAPI), CLI and an HTML report. |
 
 ## Documentation
 
-Browse everything at **[avinashistoocool.github.io/AnaTele](https://avinashistoocool.github.io/AnaTele/)**.
+All of the documentation is at **[avinashistoocool.github.io/AnaTele](https://avinashistoocool.github.io/AnaTele/)**.
 
-- [**Learn AnaTele from scratch**](https://avinashistoocool.github.io/AnaTele/learn/) ([PDF](docs/AnaTele_Illustrated_Guide.pdf)): an illustrated course for complete beginners. It has 12 chapters, 32 figures drawn from real simulated flights, and interactive widgets. It covers drones, logs, flight phases, tilt error, motors, sensors, rules, hypotheses, missions, the simulator and `.ant` sharing. Regenerate the figures with `python docs/figures/make_guide_figures.py`.
-- [**Technical report (PDF)**](docs/AnaTele_Technical_Report.pdf): the architecture and all of the mathematics, including framing, clock epochs, phase inference, tilt error, mixer decomposition, the rule detectors, hypothesis scoring, waypoint geometry, the simulator physics and the `.ant` integrity model. The LaTeX source is in [`docs/AnaTele_Technical_Report.tex`](docs/AnaTele_Technical_Report.tex).
-- [**Usage guide**](docs/USAGE.md): desktop app walkthrough, CLI, web UI, API, profiles and the simulator.
+- [**Learn AnaTele from scratch**](https://avinashistoocool.github.io/AnaTele/learn/) ([PDF](docs/AnaTele_Illustrated_Guide.pdf)): an illustrated course for persons with no experience. It has 12 chapters, 32 figures from real simulated flights, and interactive widgets. The subjects are drones, logs, flight phases, tilt error, motors, sensors, rules, hypotheses, missions, the simulator and `.ant` sharing. To make the figures again, use `python docs/figures/make_guide_figures.py`.
+- [**Technical report (PDF)**](docs/AnaTele_Technical_Report.pdf): the architecture and all of the mathematics. The subjects are framing, clock epochs, phase inference, tilt error, mixer decomposition and the rule detectors. Other subjects are hypothesis scores, waypoint geometry, the simulator physics and the `.ant` integrity model. The LaTeX source is in [`docs/AnaTele_Technical_Report.tex`](docs/AnaTele_Technical_Report.tex).
+- [**Usage guide**](docs/USAGE.md): the desktop app, CLI, web UI, API, profiles and the simulator.
 - [**Preflight checklist**](docs/PREFLIGHT.md): the separate AnaTele Preflight tool for a live vehicle.
-- [**Diagnostics reference**](docs/DIAGNOSTICS.md): every rule, the hypothesis ranking, flight phases, mission statuses and how to read *unassessable*.
-- [**Deployment**](docs/DEPLOYMENT.md): pip install, standalone desktop builds, Docker, data directories and security.
-- [**Design**](docs/DESIGN.md): the full architecture proposal and its reasoning.
+- [**Diagnostics reference**](docs/DIAGNOSTICS.md): all rules, the hypothesis sequence, flight phases, mission statuses and how to read *unassessable*.
+- [**Deployment**](docs/DEPLOYMENT.md): pip installation, standalone desktop builds, Docker, data directories and security.
+- [**Design**](docs/DESIGN.md): the full architecture proposal and the reasons for it.
 
 ## AnaTele Preflight (live vehicle)
 
-AnaTele Preflight is a **separate tool**. It is the only part of AnaTele that connects to a live vehicle. It **auto-detects** the flight controller (USB ports first, then UDP 14550), or you can pick USB (`COM3`), telemetry radio, UDP (`udpin:0.0.0.0:14550`) or TCP. One button, **Run full preflight**, runs in order: gyro and barometer calibration, level calibration, guided compass calibration, guided 6-position accelerometer calibration, pre-arm health (sensors, EKF, GPS, battery, RC, `PreArm:` messages), a props-off motor test and a parameter-profile comparison. It pauses whenever you need to move the vehicle, and it writes a JSON and Markdown report.
+AnaTele Preflight is a **separate tool**. It is the only part of AnaTele that connects to a live vehicle.
+
+AnaTele Preflight **finds the flight controller automatically**. It examines the USB ports first, then UDP 14550. You can also select USB (`COM3`), telemetry radio, UDP (`udpin:0.0.0.0:14550`) or TCP.
+
+One button, **Run full preflight**, does these steps in sequence:
+
+1. Gyro and barometer calibration.
+2. Level calibration.
+3. Guided compass calibration.
+4. Guided 6-position accelerometer calibration.
+5. Pre-arm health (sensors, EKF, GPS, battery, RC, `PreArm:` messages).
+6. A motor test with the propellers removed.
+7. A comparison with the parameter profile.
+
+The tool stops each time that you must move the vehicle. It writes a JSON report and a Markdown report.
 
 ```bash
 anatele preflight                         # window, auto-detects the vehicle (also: desktop app > Tools > Preflight checklist)
@@ -108,7 +122,12 @@ anatele preflight --no-gui                # terminal, auto-detect (or --connect 
 anatele preflight --simulate               # try it without hardware
 ```
 
-Calibrations change the vehicle's stored calibration. The vehicle is never armed, and the motor test only runs after an explicit props-removed confirmation. Read the [Preflight guide](docs/PREFLIGHT.md) before using it on a vehicle.
+> **WARNING:** Remove the propellers before the motor test. The motors turn during the test and can cause injury.
+> The motor test starts only after you confirm that the propellers are removed.
+
+> **CAUTION:** Read the [Preflight guide](docs/PREFLIGHT.md) before you use the tool on a vehicle. The calibrations change the stored calibration of the vehicle.
+
+The tool never arms the vehicle.
 
 ## Screenshots
 
@@ -116,25 +135,26 @@ Calibrations change the vehicle's stored calibration. The vehicle is never armed
 |---|---|
 | ![Flight path tab](docs/images/desktop_flight_path.png) | ![Rules tab](docs/images/desktop_rules.png) |
 
-All screenshots use **synthetic** simulator output.
+All screenshots show **synthetic** output from the simulator.
 
 ## Supported inputs
 
 | Format | Notes |
 |---|---|
-| `.tlog` | Mission Planner capture: 8-byte big-endian µs timestamp followed by a MAVLink 1/2 frame. Signed frames are kept but not verified. |
-| `.bin` / `.log` | ArduPilot DataFlash, via pymavlink `DFReader`. Common signals (ATT, VIBE, RCOU, POS, GPA, XKF4, CTUN, BAT, ARM, MSG, PARM) are normalised. |
+| `.tlog` | Mission Planner capture: an 8-byte big-endian µs timestamp, then a MAVLink 1/2 frame. AnaTele keeps signed frames, but it does not verify them. |
+| `.bin` / `.log` | ArduPilot DataFlash, through pymavlink `DFReader`. AnaTele normalises the common signals (ATT, VIBE, RCOU, POS, GPA, XKF4, CTUN, BAT, ARM, MSG, PARM). |
 | `.csv` | Fixed schema: `flight_id,drone_id,sequence,timestamp,latitude_deg,longitude_deg,altitude_m,battery_pct,mode` |
 
-Limits: 100 MiB per file, 1,000,000 records, a 180 s analysis deadline and a separate worker process for each file.
+Limits: 100 MiB for each file, 1,000,000 records, an analysis deadline of 180 s and a separate worker process for each file.
 
 ## Safety and privacy
 
-- The analyser is read-only: no MAVLink link to an aircraft, no parameter writes, no flight commands. The separate [Preflight](docs/PREFLIGHT.md) tool is the only part that talks to a vehicle. It runs calibrations and a props-off motor test, never arms the vehicle, and never writes other parameters.
-- Everything runs locally. Logs never leave your machine unless you choose to share them.
-- `.ant` files contain flight GPS positions even without the original log. Treat received `.ant` files as untrusted: AnaTele validates and hash-checks them and never executes their contents.
-- The web UI binds to `127.0.0.1` and has no login. See [DEPLOYMENT](docs/DEPLOYMENT.md) before exposing it.
-- The analysis worker is a separate process with time and size limits, but it is **not** a security sandbox.
+- The analyser only reads data. It has no MAVLink link to an aircraft, it writes no parameters and it sends no flight commands. The separate [Preflight](docs/PREFLIGHT.md) tool is the only part that communicates with a vehicle. Preflight does calibrations and a motor test with the propellers removed. It never arms the vehicle, and it never writes other parameters.
+- All processes run locally. Your logs stay on your computer, unless you decide to share them.
+- `.ant` files contain the GPS positions of the flight, also when they do not contain the original log.
+- Do not trust the `.ant` files that you receive. AnaTele validates them and examines their hash, and it never executes their contents.
+- The web UI binds to `127.0.0.1` and has no login. Read [DEPLOYMENT](docs/DEPLOYMENT.md) before you make it available to other computers.
+- The analysis worker is a separate process with time and size limits. But it is **not** a security sandbox.
 
 ## Development
 
@@ -144,15 +164,15 @@ python -m unittest discover -p "test_*.py" -v     # 44 tests; GUI tests run offs
 pyflakes telemetry_platform
 ```
 
-`test_real_log.py` is a regression test for a private real-world crash capture. It is skipped unless
-`ANATELE_REAL_TLOG` points to that file; its annotated expectations are in `fixtures/real_tlog_expectations.json`.
+`test_real_log.py` is a regression test for a private crash capture from a real flight. AnaTele skips this test unless
+`ANATELE_REAL_TLOG` points to that file. The annotated expectations for the test are in `fixtures/real_tlog_expectations.json`.
 
-Contributions are welcome, especially rules (with tests), semantic packs for other firmware versions and
+Contributions are welcome. We especially want rules (with tests), semantic packs for other firmware versions and
 anonymised real logs with known outcomes.
 
 ## Citing
 
-If AnaTele helps your research or competition report, cite it using GitHub's **Cite this repository** button
+If AnaTele helps your research or competition report, use the **Cite this repository** button on GitHub
 (from [`CITATION.cff`](CITATION.cff)).
 
 ## License

@@ -1,27 +1,27 @@
 # 12. Sharing with .ant files
 
-An investigation is often a team effort. The pilot, the builder and a reviewer may all need to see the same thing.
-Instead of sending a raw log and hoping everyone uses the same version of every tool, AnaTele saves the **whole
+Frequently, a team does an investigation. The pilot, the builder and a reviewer must all see the same data.
+If you send a raw log, each person can use a different version of each tool. Thus, AnaTele saves the **full
 analysis** as one file: `.ant`.
 
 ![.ant file](../images/guide/31_ant_file.png)
 
-## What is inside
+## Contents
 
-An `.ant` is an ordinary ZIP file. You can open it with any unzip tool, but AnaTele checks it strictly:
+An `.ant` file is a usual ZIP file. You can open it with any unzip tool, but AnaTele examines it strictly:
 
 1. `mimetype` must be exactly `application/vnd.anatele.analysis+zip`.
-2. `meta.json` lists the **SHA-256** hash of every other entry. A SHA-256 hash is a 64-character fingerprint:
-   change one byte of a file and the fingerprint changes completely.
-3. Each entry is size-limited, hashed and compared. The JSON and Parquet structure is validated **before**
-   anything is shown.
+2. `meta.json` contains the **SHA-256** hash of each other entry. A SHA-256 hash is a fingerprint of 64 characters.
+   If you change one byte of a file, the fingerprint changes fully.
+3. AnaTele sets a size limit on each entry, calculates its hash and compares the hash. It validates the JSON and Parquet structure **before**
+   it shows anything.
 
-Any mismatch and the file is rejected. A modified analysis can't pass as the original.
+If any value does not agree, AnaTele rejects the file. A changed analysis cannot pass as the original.
 
-## Saving and opening
+## Save and open
 
 === "Desktop"
-    **File → Save Analysis As (.ant)** (Ctrl+S). Open with **File → Open** or drag and drop.
+    **File → Save Analysis As (.ant)** (Ctrl+S). To open, use **File → Open** or drag and drop.
 
 === "Command line"
     ```bash
@@ -31,18 +31,19 @@ Any mismatch and the file is rejected. A modified analysis can't pass as the ori
     ```
 
 === "Web / API"
-    `GET /api/logs/{id}/export.ant` to download, `POST /api/analyses` to import.
+    To download, use `GET /api/logs/{id}/export.ant`. To import, use `POST /api/analyses`.
 
 !!! warning "Privacy"
-    `--include-original` embeds the untouched log, and that contains **GPS positions** (where you fly, often where
-    you live). Leave it out unless the receiver needs to re-run the analysis or inspect raw bytes.
+    Do not use `--include-original` unless the recipient must run the analysis again or examine the raw bytes.
+    `--include-original` puts the unchanged log in the file. The log contains **GPS positions**: where you fly, and frequently where
+    you live.
 
-## The report inside
+## The report in the file
 
-`report.html` is a self-contained, printable report: findings, hypotheses, rule states, phases and the mission
-table. It opens in any browser, so someone without AnaTele can still read the result.
+`report.html` is a printable report that contains all of its content: findings, hypotheses, rule states, phases and the mission
+table. It opens in all browsers. Thus, a person without AnaTele can also read the result.
 
 ---
 
-**You've finished the course.** Next: open a real log in the desktop app, use the
-[Usage guide](../USAGE.md) for the controls and the [Diagnostics reference](../DIAGNOSTICS.md) for every rule.
+**You completed the course.** Next, open a real log in the desktop app. Use the
+[Usage guide](../USAGE.md) for the controls and the [Diagnostics reference](../DIAGNOSTICS.md) for all rules.
