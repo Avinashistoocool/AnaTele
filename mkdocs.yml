@@ -56,6 +56,7 @@ nav:
   - Deployment: DEPLOYMENT.md
   - Design: DESIGN.md
   - Technical report (PDF): AnaTele_Technical_Report.pdf
+  - All projects: https://avinashistoocool.github.io/projects/
 
 markdown_extensions:
   - admonition
