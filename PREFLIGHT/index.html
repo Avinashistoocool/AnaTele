@@ -1,0 +1,1889 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AnaTele by Avinash Chandra Gupta: drone crash investigation for ArduPilot flight logs with 3D replay, diagnostics and ranked hypotheses.">
+      
+      
+        <meta name="author" content="Avinash Chandra Gupta">
+      
+      
+        <link rel="canonical" href="https://avinashistoocool.github.io/AnaTele/PREFLIGHT/">
+      
+      
+        <link rel="prev" href="../USAGE/">
+      
+      
+        <link rel="next" href="../DIAGNOSTICS/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../images/anatele_concept2_icon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Preflight checklist - AnaTele</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/learn.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#anatele-preflight-one-button-calibration-and-pre-flight-checklist" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="AnaTele" class="md-header__button md-logo" aria-label="AnaTele" data-md-component="logo">
+      
+  <img src="../images/anatele_concept2_icon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AnaTele
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Preflight checklist
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Avinashistoocool/AnaTele" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Avinashistoocool/AnaTele
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AnaTele" class="md-nav__button md-logo" aria-label="AnaTele" data-md-component="logo">
+      
+  <img src="../images/anatele_concept2_icon.svg" alt="logo">
+
+    </a>
+    AnaTele
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Avinashistoocool/AnaTele" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Avinashistoocool/AnaTele
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn (illustrated guide)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learn (illustrated guide)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Start here
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/01-drones-101/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Drones 101
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/02-logs-and-mavlink/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Logs and MAVLink
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/03-time-and-sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Time and sources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/04-flight-phases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. Flight phases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/05-attitude-and-tilt-error/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Attitude and tilt error
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/06-motors-and-mixing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Motors and mixing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/07-vibration-ekf-compass/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Vibration, EKF and compass
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/08-rules-and-states/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. Rules and their four states
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/09-hypotheses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Hypotheses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/10-missions-and-geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Missions and geometry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/11-simulator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. The simulator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/12-sharing-ant/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Sharing with .ant files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/widgets-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interactive widgets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AnaTele_Illustrated_Guide.pdf" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Illustrated guide (PDF)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../USAGE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Preflight checklist
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Preflight checklist
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connecting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connecting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using the window
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-terminal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using the terminal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step by step
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step by step">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gyro-barometer-and-level" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gyro, barometer and level
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compass-calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compass calibration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accelerometer-6-position-calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accelerometer 6-position calibration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-arm-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-arm health
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#motor-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motor test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simulate-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simulate mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#report-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Report format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verified-and-not-verified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verified and not verified
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DIAGNOSTICS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagnostics reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEPLOYMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DESIGN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AnaTele_Technical_Report.pdf" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical report (PDF)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://avinashistoocool.github.io/projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    All projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connecting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connecting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using the window
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-terminal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using the terminal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step by step
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step by step">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gyro-barometer-and-level" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gyro, barometer and level
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compass-calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compass calibration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accelerometer-6-position-calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accelerometer 6-position calibration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-arm-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-arm health
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#motor-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motor test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simulate-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simulate mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#report-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Report format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verified-and-not-verified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verified and not verified
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="anatele-preflight-one-button-calibration-and-pre-flight-checklist">AnaTele Preflight: one-button calibration and pre-flight checklist<a class="headerlink" href="#anatele-preflight-one-button-calibration-and-pre-flight-checklist" title="Permanent link">&para;</a></h1>
+<p>AnaTele Preflight runs the bench checks and calibrations you would normally do in a ground control station
+before a flight. One button, <strong>Run full preflight</strong>, does them in order. It stops when it needs you to move the
+vehicle, and it writes a timestamped report when it finishes.</p>
+<div class="admonition danger">
+<p class="admonition-title">Preflight talks to a live vehicle</p>
+<p>The rest of AnaTele is <strong>read-only</strong>. It only reads log files. Preflight is the <strong>only</strong> part that opens a
+MAVLink connection to a vehicle and sends commands. It runs as a separate tool (<code>anatele preflight</code>, or
+<strong>Tools → Preflight checklist…</strong> in the desktop app, which opens its own window and process).</p>
+<ul>
+<li>Calibrations <strong>overwrite the vehicle's stored calibration</strong> (gyro, barometer, level trim, compass offsets,
+  accelerometer offsets and scales). Reboot the vehicle after compass or accelerometer calibration.</li>
+<li>Preflight <strong>never arms</strong> the vehicle. It refuses to start if the vehicle is armed. If the vehicle becomes armed
+  during the run, the run stops.</li>
+<li>The <strong>motor test spins motors</strong>. It only runs when you tick <strong>Props removed</strong>, and the GUI asks you to confirm
+  that again. In the terminal you must type <code>props off</code>. <strong>Remove every propeller first.</strong></li>
+<li>Every wait has a timeout, and <strong>Abort</strong> stops the run at the next check.</li>
+</ul>
+</div>
+<h2 id="what-it-checks">What it checks<a class="headerlink" href="#what-it-checks" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>What happens</th>
+<th>Needs you?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Connect and heartbeat</td>
+<td>Waits for <code>HEARTBEAT</code>, then reads the vehicle type, autopilot and firmware (<code>AUTOPILOT_VERSION</code>). <strong>Refuses to continue if armed.</strong></td>
+<td>No</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Gyro and barometer calibration</td>
+<td><code>MAV_CMD_PREFLIGHT_CALIBRATION</code> with param1=1 (gyro), then param3=1 (baro ground pressure), each waiting for <code>COMMAND_ACK</code>.</td>
+<td>Keep it still</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Level (board) calibration</td>
+<td><code>MAV_CMD_PREFLIGHT_CALIBRATION</code> param5=2. Sets the AHRS trim from the current attitude.</td>
+<td>Keep it level and still</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Compass calibration (guided)</td>
+<td><code>MAV_CMD_DO_START_MAG_CAL</code> (all compasses, retry, autosave). Shows <code>MAG_CAL_PROGRESS</code> per compass and the <code>MAG_CAL_REPORT</code> result (status, fitness). <strong>Cancel</strong> sends <code>MAV_CMD_DO_CANCEL_MAG_CAL</code>.</td>
+<td><strong>Rotate the vehicle</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Accelerometer 6-position (guided)</td>
+<td><code>MAV_CMD_PREFLIGHT_CALIBRATION</code> param5=1. Follows the vehicle's <code>MAV_CMD_ACCELCAL_VEHICLE_POS</code> requests (LEVEL, LEFT, RIGHT, NOSE DOWN, NOSE UP, BACK). <strong>Next</strong> confirms each position.</td>
+<td><strong>Place the vehicle 6 ways</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Pre-arm health</td>
+<td>Sends <code>MAV_CMD_RUN_PREARM_CHECKS</code> and collects <code>SYS_STATUS</code> sensor health, <code>EKF_STATUS_REPORT</code> flags and variances, <code>GPS_RAW_INT</code> fix, satellites and HDOP, battery (<code>SYS_STATUS</code>/<code>BATTERY_STATUS</code>), <code>RC_CHANNELS</code> and every <code>PreArm:</code> message.</td>
+<td>No</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Motor test (props off)</td>
+<td><code>MAV_CMD_DO_MOTOR_TEST</code> for each motor in turn, at 6 % throttle (1 to 15 % allowed) for 2 s. Multicopters only. <strong>Skipped unless "Props removed" is ticked.</strong></td>
+<td>Confirm order and direction</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Parameters vs profile</td>
+<td>Reads the parameters in your profile (<code>PARAM_REQUEST_READ</code>, or <code>PARAM_REQUEST_LIST</code> for large profiles) and reports mismatches.</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Each step ends as <strong>PASS</strong>, <strong>WARN</strong>, <strong>FAIL</strong>, <strong>SKIPPED</strong> or <strong>NEEDS_USER</strong>, with a one-line message. NEEDS_USER
+means a guided step was cancelled or had nobody to answer it. The overall result is the worst step result.
+A failed step does not stop the run (except for a failed connection or an armed vehicle). You see everything in
+one pass.</p>
+<h2 id="connecting">Connecting<a class="headerlink" href="#connecting" title="Permanent link">&para;</a></h2>
+<p>You usually don't need a connection string. <strong>Auto-detect is the default.</strong> It lists the serial ports, puts
+anything that looks like a flight controller first (USB vendor ids of ArduPilot/ChibiOS boards, or "ArduPilot",
+"Pixhawk", "Cube" in the name), then USB-serial radios, and finally listens on UDP 14550. It picks the first one
+that sends an autopilot HEARTBEAT. While scanning it only <em>listens</em>; nothing is sent until a vehicle answers.
+Bluetooth serial ports are skipped because opening them can hang; choose one by hand if your radio uses Bluetooth.</p>
+<div class="highlight"><pre><span></span><code>anatele<span class="w"> </span>preflight<span class="w"> </span>--list-ports<span class="w">   </span><span class="c1"># what auto-detect would see, flight controller first</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Link</th>
+<th>Connection string</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto-detect</td>
+<td><code>auto</code> (default)</td>
+<td>Scans USB serial, then <code>udpin:0.0.0.0:14550</code>.</td>
+</tr>
+<tr>
+<td>USB (Windows)</td>
+<td><code>COM3</code></td>
+<td>Baud is ignored for native USB, but 115200 is the usual value. Close Mission Planner/QGC first; only one program can open the port.</td>
+</tr>
+<tr>
+<td>USB (Linux/macOS)</td>
+<td><code>/dev/ttyACM0</code>, <code>/dev/tty.usbmodem*</code></td>
+<td>You may need to be in the <code>dialout</code> group.</td>
+</tr>
+<tr>
+<td>Telemetry radio</td>
+<td><code>COM5</code> with baud <code>57600</code></td>
+<td>SiK radios default to 57600.</td>
+</tr>
+<tr>
+<td>UDP (listen)</td>
+<td><code>udpin:0.0.0.0:14550</code></td>
+<td>For SITL, MAVProxy <code>--out</code>, or a companion computer/Wi-Fi bridge sending to this PC.</td>
+</tr>
+<tr>
+<td>UDP (send)</td>
+<td><code>udpout:192.168.4.1:14550</code></td>
+<td>When the vehicle side listens.</td>
+</tr>
+<tr>
+<td>TCP</td>
+<td><code>tcp:127.0.0.1:5760</code></td>
+<td>SITL's default TCP port.</td>
+</tr>
+<tr>
+<td>Simulated</td>
+<td><code>sim:</code> (or <code>--simulate</code>)</td>
+<td>A built-in fake ArduCopter. Try the whole flow with no hardware.</td>
+</tr>
+</tbody>
+</table>
+<p>Preflight asks the vehicle for telemetry streams (<code>REQUEST_DATA_STREAM</code>), because some links stream nothing until a
+ground station asks.</p>
+<h2 id="using-the-window">Using the window<a class="headerlink" href="#using-the-window" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>anatele<span class="w"> </span>preflight<span class="w">                      </span><span class="c1"># opens the Preflight window (auto-detect selected)</span>
+anatele<span class="w"> </span>preflight<span class="w"> </span>--connect<span class="w"> </span>COM3<span class="w">       </span><span class="c1"># pre-selects a port</span>
+anatele<span class="w"> </span>preflight<span class="w"> </span>--simulate<span class="w">           </span><span class="c1"># simulated vehicle</span>
+</code></pre></div>
+<p>You can also open it from the desktop app: <strong>Tools → Preflight checklist…</strong>.</p>
+<ol>
+<li>The <strong>Connection</strong> list shows <em>Auto-detect</em>, every detected serial port (flight controllers first), UDP 14550
+   and the simulated vehicle. Leave it on Auto-detect, pick a port, or type any connection string. <strong>Refresh</strong>
+   re-scans after you plug the board in. Press <strong>Connect</strong>, or press <strong>Run full preflight</strong> straight away; it
+   connects first.</li>
+<li>Optional: <strong>Load profile…</strong> to compare parameters, and tick <strong>Props removed</strong> if you want the motor test.</li>
+<li>Press <strong>Run full preflight</strong>. The checklist table fills in with coloured statuses, the progress bar shows the
+   current step, and the log pane shows every vehicle message.</li>
+<li>When a guided step needs you, the <strong>Action needed</strong> bar appears with the instruction and <strong>Next</strong> / <strong>Cancel</strong>
+   (or <strong>Yes</strong> / <strong>No</strong>) buttons.</li>
+<li>When the run finishes, the report is saved automatically to <code>~/AnaTele Preflight/</code>. <strong>Export report…</strong> saves another
+   copy to any folder.</li>
+</ol>
+<h2 id="using-the-terminal">Using the terminal<a class="headerlink" href="#using-the-terminal" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>anatele<span class="w"> </span>preflight<span class="w"> </span>--no-gui<span class="w">                      </span><span class="c1"># auto-detect</span>
+anatele<span class="w"> </span>preflight<span class="w"> </span>--no-gui<span class="w"> </span>--connect<span class="w"> </span>COM3
+anatele<span class="w"> </span>preflight<span class="w"> </span>--no-gui<span class="w"> </span>--connect<span class="w"> </span>udpin:0.0.0.0:14550<span class="w"> </span>--profile<span class="w"> </span>quad.json<span class="w"> </span>--report-dir<span class="w"> </span>reports
+anatele<span class="w"> </span>preflight<span class="w"> </span>--no-gui<span class="w"> </span>--connect<span class="w"> </span>COM3<span class="w"> </span>--props-removed<span class="w">          </span><span class="c1"># asks you to type "props off"</span>
+anatele<span class="w"> </span>preflight<span class="w"> </span>--no-gui<span class="w"> </span>--simulate<span class="w"> </span>--skip<span class="w"> </span>compass<span class="w"> </span>accel
+anatele<span class="w"> </span>preflight<span class="w"> </span>--no-gui<span class="w"> </span>--connect<span class="w"> </span>COM3<span class="w"> </span>--save-profile<span class="w"> </span>quad.json<span class="w">  </span><span class="c1"># save current parameters as a profile</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--connect STR</code></td>
+<td>Connection string (see the table above); default <code>auto</code></td>
+</tr>
+<tr>
+<td><code>--list-ports</code></td>
+<td>List serial ports, likely flight controller first, and exit</td>
+</tr>
+<tr>
+<td><code>--baud N</code></td>
+<td>Serial baud rate (default 115200)</td>
+</tr>
+<tr>
+<td><code>--simulate</code></td>
+<td>Use the built-in simulated vehicle</td>
+</tr>
+<tr>
+<td><code>--no-gui</code></td>
+<td>Run in the terminal. Guided steps prompt there: <strong>Enter</strong> = Next/Yes, <code>n</code> = No, <code>c</code> = Cancel</td>
+</tr>
+<tr>
+<td><code>--profile FILE</code></td>
+<td>Parameter profile to compare against</td>
+</tr>
+<tr>
+<td><code>--save-profile FILE</code></td>
+<td>Download the current parameters, save them as a profile, then exit</td>
+</tr>
+<tr>
+<td><code>--report-dir DIR</code></td>
+<td>Where to write the report (default <code>~/AnaTele Preflight</code>)</td>
+</tr>
+<tr>
+<td><code>--skip STEP …</code></td>
+<td>Skip steps: <code>gyro_baro</code>, <code>level</code>, <code>compass</code>, <code>accel</code>, <code>health</code>, <code>motors</code>, <code>params</code></td>
+</tr>
+<tr>
+<td><code>--props-removed</code></td>
+<td>Allow the motor test (confirmed again by typing <code>props off</code>)</td>
+</tr>
+<tr>
+<td><code>--motor-throttle P</code></td>
+<td>Motor-test throttle in percent, 1 to 15 (default 6)</td>
+</tr>
+</tbody>
+</table>
+<p>The exit code is 0 when the overall result is PASS or WARN and 1 otherwise. That makes it usable in scripts.</p>
+<h2 id="step-by-step">Step by step<a class="headerlink" href="#step-by-step" title="Permanent link">&para;</a></h2>
+<h3 id="gyro-barometer-and-level">Gyro, barometer and level<a class="headerlink" href="#gyro-barometer-and-level" title="Permanent link">&para;</a></h3>
+<p>Put the vehicle on a level, stable surface and don't touch it. Preflight asks you once to confirm that it is still.
+Gyro calibration takes a few seconds. The barometer calibration sets the current pressure as ground level. Level
+calibration stores the current attitude as "level" (AHRS trim). ArduPilot refuses trims over 10°. Do the
+accelerometer calibration first on a new board; level calibration only fine-tunes it.</p>
+<h3 id="compass-calibration">Compass calibration<a class="headerlink" href="#compass-calibration" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Take the vehicle away from metal, cars, reinforced concrete, laptops and phone chargers. Fit the battery if it
+   is near the compass in flight.</li>
+<li>When the prompt appears, pick the vehicle up and slowly rotate it so that each side (top, bottom, nose, tail,
+   left, right) points at the ground in turn. A smooth "figure of eight" while turning around yourself works well.</li>
+<li>Progress for each compass is shown in percent. When every compass has reported, the step shows the status and
+   <strong>fitness</strong> (lower is better) for each one.</li>
+<li>A failed compass is retried automatically by the vehicle. If it still fails, the step is <strong>FAIL</strong>. Check the
+   compass orientation (<code>COMPASS_ORIENT</code>) and move further from interference.</li>
+<li>Results are saved automatically on success. <strong>Reboot the vehicle</strong> to use the new offsets.</li>
+</ol>
+<p><strong>Cancel</strong> stops the calibration on the vehicle and keeps the previous calibration.</p>
+<h3 id="accelerometer-6-position-calibration">Accelerometer 6-position calibration<a class="headerlink" href="#accelerometer-6-position-calibration" title="Permanent link">&para;</a></h3>
+<p>The vehicle drives this calibration: it asks for each position in turn, and the prompt follows it.</p>
+<ol>
+<li>Place the vehicle in the position shown and hold it <strong>completely still</strong>:
+   <strong>level</strong>, <strong>on its LEFT side</strong>, <strong>on its RIGHT side</strong>, <strong>nose DOWN</strong>, <strong>nose UP</strong>, <strong>on its BACK</strong>.</li>
+<li>Press <strong>Next</strong>. The vehicle samples for about a second and then asks for the next position.</li>
+<li>After the sixth position the vehicle reports success or failure. On success, <strong>reboot the vehicle</strong>.</li>
+</ol>
+<p>If you cancel half-way, the vehicle keeps waiting for positions until it reboots. Reboot it to abandon the
+calibration.</p>
+<h3 id="pre-arm-health">Pre-arm health<a class="headerlink" href="#pre-arm-health" title="Permanent link">&para;</a></h3>
+<p>Preflight listens to telemetry for a few seconds, asks the vehicle to run its pre-arm checks, and then reports:</p>
+<ul>
+<li><strong>FAIL</strong>: an enabled sensor reports unhealthy, pre-arm checks are failing (any <code>PreArm:</code> message), the EKF has no
+  attitude, or an EKF variance is 0.8 or higher.</li>
+<li><strong>WARN</strong>: no 3D GPS fix, fewer than 6 satellites, HDOP above 2, EKF variance from 0.5 to 0.8, battery below
+  30 %, battery or RC data missing.</li>
+</ul>
+<h3 id="motor-test">Motor test<a class="headerlink" href="#motor-test" title="Permanent link">&para;</a></h3>
+<p>Only for multicopters, and only with <strong>Props removed</strong> ticked. The motor count comes from <code>FRAME_CLASS</code>
+(4 is assumed if unknown). Each motor spins in turn at low throttle for 2 s, in test order A, B, C… (clockwise
+from front right on most frames). Afterwards you are asked whether the order and direction were right. Compare
+them with the ArduPilot motor-order diagram for your frame.</p>
+<p>The vehicle refuses the test if it is not landed, the board is still initialising, or RC is not calibrated. The
+vehicle's reason is shown.</p>
+<h3 id="parameter-profiles">Parameter profiles<a class="headerlink" href="#parameter-profiles" title="Permanent link">&para;</a></h3>
+<p>A profile is a JSON file:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-quad"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"tolerance"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0001</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"params"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"FRAME_CLASS"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"FRAME_TYPE"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"BATT_LOW_VOLT"</span><span class="p">:</span><span class="w"> </span><span class="mf">14.0</span><span class="p">,</span><span class="w"> </span><span class="nt">"FS_THR_ENABLE"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Save current as profile…</strong> (or <code>--save-profile</code>) downloads every parameter and keeps the ones that matter for
+safety: <code>FRAME_*</code>, <code>BATT_*</code>, <code>FS_*</code>, <code>FENCE_*</code>, <code>RTL_*</code>, <code>ARMING_*</code>, <code>MOT_SPIN_*</code>, <code>MOT_PWM_*</code>, <code>MOT_BAT_*</code>,
+<code>THR_FS*</code>, <code>RC_FS*</code> and <code>BRD_SAFETY*</code>. Edit the file to add or remove parameters. Values are compared with a
+relative tolerance (default 1e-4). Missing parameters are a WARN, and differing values are a FAIL.</p>
+<p>Preflight <strong>never writes parameters</strong> except for the calibration values the vehicle saves itself.</p>
+<h2 id="simulate-mode">Simulate mode<a class="headerlink" href="#simulate-mode" title="Permanent link">&para;</a></h2>
+<p><code>--simulate</code> (or connection <code>sim:</code>) uses a built-in fake ArduCopter. It answers like the real firmware: ACKs, compass
+progress and reports, accelerometer position requests, telemetry, parameters and motor-test ACKs. Use it to learn
+the flow or to demo the tool. The test suite (<code>test_preflight.py</code>) uses the same simulator.</p>
+<h2 id="report-format">Report format<a class="headerlink" href="#report-format" title="Permanent link">&para;</a></h2>
+<p>Each run writes <code>preflight-YYYYMMDD-HHMMSS.json</code> and <code>.md</code> to the report folder.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"tool"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnaTele Preflight"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"anatele_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.5.0"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"started"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-10-30T18:40:02+0530"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"finished"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-10-30T18:47:31+0530"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"connection"</span><span class="p">:</span><span class="w"> </span><span class="s2">"COM3 @ 115200"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"vehicle"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"vehicle_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"QUADROTOR"</span><span class="p">,</span><span class="w"> </span><span class="nt">"autopilot"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ARDUPILOTMEGA"</span><span class="p">,</span><span class="w"> </span><span class="nt">"firmware"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4.6.3 (official)"</span><span class="p">,</span><span class="w"> </span><span class="nt">"system_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"overall"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WARN"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"props_removed_confirmed"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-quad"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"steps"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"connect"</span><span class="p">,</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Connect and heartbeat"</span><span class="p">,</span><span class="w"> </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PASS"</span><span class="p">,</span><span class="w"> </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">,</span><span class="w"> </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w"> </span><span class="nt">"duration_s"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.2</span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The Markdown file has the same content as a table, followed by the details for each step (compass fitness and
+offsets, accelerometer positions, EKF variances, GPS, battery, PreArm messages, parameter mismatches).
+A report is a checklist record. <strong>It is not an airworthiness approval.</strong></p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>What to try</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>No HEARTBEAT within 10 s</em></td>
+<td>Wrong port or baud; another program (Mission Planner, QGC, MAVProxy) holds the port; radio not linked; for UDP, check the firewall and that the vehicle sends to this PC.</td>
+</tr>
+<tr>
+<td><em>Vehicle is ARMED</em></td>
+<td>Disarm with your transmitter or GCS. Preflight never disarms or arms.</td>
+</tr>
+<tr>
+<td>Gyro calibration FAILED</td>
+<td>The vehicle moved. Leave it still on a stable surface and run again.</td>
+</tr>
+<tr>
+<td>Level calibration FAILED / <em>trim over maximum</em></td>
+<td>The vehicle is more than 10° off level, or the accelerometers are not calibrated yet. Do the accelerometer calibration first.</td>
+</tr>
+<tr>
+<td>Compass: no <code>MAG_CAL_PROGRESS</code></td>
+<td>The <code>EXTRA3</code> stream is disabled on that link (<code>SRn_EXTRA3</code> = 0). Raise it, or use USB.</td>
+</tr>
+<tr>
+<td>Compass fitness high / FAILED</td>
+<td>Move away from metal and electronics. Check <code>COMPASS_ORIENT</code>, and try <code>COMPASS_CAL_FIT</code> only if you understand the trade-off.</td>
+</tr>
+<tr>
+<td>Accelerometer stops asking for positions</td>
+<td>The calibration timed out or the vehicle moved while sampling. Reboot the vehicle and repeat.</td>
+</tr>
+<tr>
+<td>Motor test refused: <em>not landed</em> / <em>RC not calibrated</em></td>
+<td>Calibrate the radio. Make sure the vehicle is on the ground and disarmed.</td>
+</tr>
+<tr>
+<td>Health WARN <em>no RC_CHANNELS</em></td>
+<td>The receiver is not connected or bound, or <code>RC_PROTOCOLS</code> excludes it.</td>
+</tr>
+<tr>
+<td>Everything is slow over the radio</td>
+<td>Long-range radios are slow. Parameter download uses single reads unless the profile has more than 40 entries.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="verified-and-not-verified">Verified and not verified<a class="headerlink" href="#verified-and-not-verified" title="Permanent link">&para;</a></h2>
+<p>The command parameters and the guided-calibration flow follow the ArduPilot sources (<code>GCS_Common.cpp</code>,
+<code>AP_AccelCal.cpp</code>, <code>AP_Compass_Calibration.cpp</code>, <code>CompassCalibrator.cpp</code>, Copter <code>motor_test.cpp</code>). The automated
+tests run against the simulated vehicle. Behaviour on your firmware version, board and link may differ. Watch the
+first runs on real hardware closely, and keep your ground control station available as the reference tool.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      \"&copy; 2026 Avinash Chandra Gupta (Avinash Gupta) &middot; <a href='https://avinashistoocool.github.io/'>avinashistoocool.github.io</a>\"
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://avinashistoocool.github.io/" target="_blank" rel="noopener" title="Avinash Chandra Gupta" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/Avinashistoocool" target="_blank" rel="noopener" title="Avinash Chandra Gupta on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://www.linkedin.com/in/avinashistoocool" target="_blank" rel="noopener" title="Avinash Chandra Gupta on LinkedIn" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://x.com/suprcoolavinash" target="_blank" rel="noopener" title="Avinash Chandra Gupta on X" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="../javascripts/learn.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,3917 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AnaTele by Avinash Chandra Gupta: drone crash investigation for ArduPilot flight logs with 3D replay, diagnostics and ranked hypotheses.">
+      
+      
+        <meta name="author" content="Avinash Chandra Gupta">
+      
+      
+        <link rel="canonical" href="https://avinashistoocool.github.io/AnaTele/DESIGN/">
+      
+      
+        <link rel="prev" href="../DEPLOYMENT/">
+      
+      
+        <link rel="next" href="../AnaTele_Technical_Report.pdf">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../images/anatele_concept2_icon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Design - AnaTele</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/learn.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#drone-telemetry-investigation-platform" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="AnaTele" class="md-header__button md-logo" aria-label="AnaTele" data-md-component="logo">
+      
+  <img src="../images/anatele_concept2_icon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AnaTele
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Design
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Avinashistoocool/AnaTele" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Avinashistoocool/AnaTele
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AnaTele" class="md-nav__button md-logo" aria-label="AnaTele" data-md-component="logo">
+      
+  <img src="../images/anatele_concept2_icon.svg" alt="logo">
+
+    </a>
+    AnaTele
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Avinashistoocool/AnaTele" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Avinashistoocool/AnaTele
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn (illustrated guide)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learn (illustrated guide)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Start here
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/01-drones-101/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Drones 101
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/02-logs-and-mavlink/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Logs and MAVLink
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/03-time-and-sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Time and sources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/04-flight-phases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. Flight phases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/05-attitude-and-tilt-error/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Attitude and tilt error
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/06-motors-and-mixing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Motors and mixing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/07-vibration-ekf-compass/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Vibration, EKF and compass
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/08-rules-and-states/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. Rules and their four states
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/09-hypotheses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Hypotheses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/10-missions-and-geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Missions and geometry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/11-simulator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. The simulator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/12-sharing-ant/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Sharing with .ant files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/widgets-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interactive widgets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AnaTele_Illustrated_Guide.pdf" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Illustrated guide (PDF)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../USAGE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PREFLIGHT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Preflight checklist
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DIAGNOSTICS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagnostics reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEPLOYMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-assumptions-and-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Assumptions and boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-product-vision-and-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Product vision and users
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Product vision and users">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-central-product-promise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The central product promise
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Different users
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-correctly-interpreting-the-motivating-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Correctly interpreting the motivating incident
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Correctly interpreting the motivating incident">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#facts-to-reconstruct-versus-conclusions-to-investigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Facts to reconstruct versus conclusions to investigate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critical-firmware-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Critical firmware details
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-provisional-investigation-not-a-numeric-verdict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A provisional investigation, not a numeric verdict
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-recommended-system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Recommended system architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Recommended system architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technology-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technology choices
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#job-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Job lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Data model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Data model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-canonical-observation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example canonical observation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-finding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example finding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-parsing-and-data-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Parsing and data integrity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Parsing and data integrity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#format-detection-and-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Format detection and isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mission-planner-tlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mission Planner tlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mavlink-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MAVLink validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#identities-and-message-loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identities and message loss
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statustext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STATUSTEXT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataflash-ulog-and-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DataFlash, ULog and CSV
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-clock-model-and-synchronization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Clock model and synchronization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-profile-and-parameter-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Profile and parameter audit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Profile and parameter audit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameter-completeness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter completeness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audits-and-comparisons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audits and comparisons
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-diagnosis-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Diagnosis engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Diagnosis engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-a-establish-observations-and-operating-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage A: establish observations and operating context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-b-derive-events-and-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage B: derive events and indicators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-c-evaluate-hypothesis-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage C: evaluate hypothesis rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-d-rank-without-pretending-to-know-probabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage D: rank without pretending to know probabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-e-recommend-discriminating-evidence-and-safe-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage E: recommend discriminating evidence and safe actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-eight-concrete-rule-designs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Eight concrete rule designs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Eight concrete rule designs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rule-1-repeated-pre-arm-radio-integrity-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 1: repeated pre-arm radio-integrity failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-2-arming-rejected-by-mode-or-throttle-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 2: arming rejected by mode or throttle state
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-3-estimatorcompass-event-before-crash-check-disarm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 3: estimator/compass event before crash-check disarm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-4-loss-of-thrust-vector-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 4: loss of thrust-vector tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-5-sustained-vibration-and-accelerometer-clipping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 5: sustained vibration and accelerometer clipping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-6-abnormal-propulsion-command-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 6: abnormal propulsion-command distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-7-power-monitoring-gap-or-voltage-anomaly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 7: power monitoring gap or voltage anomaly
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-8-communicationnavigation-policy-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 8: communication/navigation policy mismatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-mission-reconstruction-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Mission reconstruction and analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Mission reconstruction and analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#treat-uploads-as-transactions-with-uncertain-outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Treat uploads as transactions with uncertain outcomes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reached-versus-observed-near" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reached versus observed near
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geometry-and-mission-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry and mission warnings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-interface-and-reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Interface and reports
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Interface and reports">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#investigation-screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Investigation screen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3d" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3D
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reports
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-fleet-trends-and-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Fleet trends and maintenance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-rule-extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Rule extensibility
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Rule extensibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mvp-a-bounded-dsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MVP: a bounded DSL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#later-isolated-executable-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Later: isolated executable extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-testing-and-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Testing and evaluation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Testing and evaluation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#four-test-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four test layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ground-truth-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ground-truth levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-security-privacy-and-operational-reliability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Security, privacy and operational reliability
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-performance-and-large-log-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Performance and large-log design
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-roadmap-and-mvp-acceptance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Roadmap and MVP acceptance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="18. Roadmap and MVP acceptance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#milestone-0-establish-the-evidence-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 0: establish the evidence contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-1-reliable-ardupilot-ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 1: reliable ArduPilot ingestion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-2-investigation-ui-and-baseline-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 2: investigation UI and baseline health
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-3-diagnostic-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 3: diagnostic MVP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-4-operational-hardening-and-expansion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 4: operational hardening and expansion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-5-outcome-driven-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 5: outcome-driven learning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-important-challenges-to-the-original-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. Important challenges to the original plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AnaTele_Technical_Report.pdf" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical report (PDF)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://avinashistoocool.github.io/projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    All projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-assumptions-and-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Assumptions and boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-product-vision-and-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Product vision and users
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Product vision and users">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-central-product-promise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The central product promise
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Different users
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-correctly-interpreting-the-motivating-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Correctly interpreting the motivating incident
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Correctly interpreting the motivating incident">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#facts-to-reconstruct-versus-conclusions-to-investigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Facts to reconstruct versus conclusions to investigate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critical-firmware-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Critical firmware details
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-provisional-investigation-not-a-numeric-verdict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A provisional investigation, not a numeric verdict
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-recommended-system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Recommended system architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Recommended system architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technology-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technology choices
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#job-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Job lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Data model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Data model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-canonical-observation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example canonical observation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-finding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example finding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-parsing-and-data-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Parsing and data integrity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Parsing and data integrity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#format-detection-and-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Format detection and isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mission-planner-tlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mission Planner tlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mavlink-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MAVLink validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#identities-and-message-loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identities and message loss
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statustext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STATUSTEXT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataflash-ulog-and-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DataFlash, ULog and CSV
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-clock-model-and-synchronization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Clock model and synchronization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-profile-and-parameter-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Profile and parameter audit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Profile and parameter audit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameter-completeness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter completeness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audits-and-comparisons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audits and comparisons
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-diagnosis-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Diagnosis engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Diagnosis engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-a-establish-observations-and-operating-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage A: establish observations and operating context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-b-derive-events-and-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage B: derive events and indicators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-c-evaluate-hypothesis-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage C: evaluate hypothesis rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-d-rank-without-pretending-to-know-probabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage D: rank without pretending to know probabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-e-recommend-discriminating-evidence-and-safe-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage E: recommend discriminating evidence and safe actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-eight-concrete-rule-designs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Eight concrete rule designs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Eight concrete rule designs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rule-1-repeated-pre-arm-radio-integrity-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 1: repeated pre-arm radio-integrity failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-2-arming-rejected-by-mode-or-throttle-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 2: arming rejected by mode or throttle state
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-3-estimatorcompass-event-before-crash-check-disarm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 3: estimator/compass event before crash-check disarm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-4-loss-of-thrust-vector-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 4: loss of thrust-vector tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-5-sustained-vibration-and-accelerometer-clipping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 5: sustained vibration and accelerometer clipping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-6-abnormal-propulsion-command-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 6: abnormal propulsion-command distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-7-power-monitoring-gap-or-voltage-anomaly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 7: power monitoring gap or voltage anomaly
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-8-communicationnavigation-policy-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 8: communication/navigation policy mismatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-mission-reconstruction-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Mission reconstruction and analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Mission reconstruction and analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#treat-uploads-as-transactions-with-uncertain-outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Treat uploads as transactions with uncertain outcomes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reached-versus-observed-near" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reached versus observed near
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geometry-and-mission-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry and mission warnings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-interface-and-reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Interface and reports
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Interface and reports">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#investigation-screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Investigation screen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3d" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3D
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reports
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-fleet-trends-and-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Fleet trends and maintenance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-rule-extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Rule extensibility
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Rule extensibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mvp-a-bounded-dsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MVP: a bounded DSL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#later-isolated-executable-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Later: isolated executable extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-testing-and-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Testing and evaluation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Testing and evaluation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#four-test-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four test layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ground-truth-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ground-truth levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-security-privacy-and-operational-reliability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Security, privacy and operational reliability
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-performance-and-large-log-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Performance and large-log design
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-roadmap-and-mvp-acceptance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Roadmap and MVP acceptance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="18. Roadmap and MVP acceptance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#milestone-0-establish-the-evidence-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 0: establish the evidence contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-1-reliable-ardupilot-ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 1: reliable ArduPilot ingestion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-2-investigation-ui-and-baseline-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 2: investigation UI and baseline health
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-3-diagnostic-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 3: diagnostic MVP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-4-operational-hardening-and-expansion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 4: operational hardening and expansion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-5-outcome-driven-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone 5: outcome-driven learning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-important-challenges-to-the-original-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. Important challenges to the original plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="drone-telemetry-investigation-platform">Drone telemetry investigation platform<a class="headerlink" href="#drone-telemetry-investigation-platform" title="Permanent link">&para;</a></h1>
+<p><strong>Design baseline:</strong> 29 October 2026<br />
+<strong>Status:</strong> architecture proposal, not an implementation claim. The existing
+<code>drone_telemetry.py</code> prototype remains a CSV-only offline demonstrator.</p>
+<h2 id="executive-summary">Executive summary<a class="headerlink" href="#executive-summary" title="Permanent link">&para;</a></h2>
+<p>Build an evidence-based flight investigation workbench. Its main job is to
+reconstruct what the aircraft and its operator reported, distinguish observations
+from interpretations, rank plausible failure mechanisms, and make every claim
+traceable to the original records. It must not issue an unqualified crash verdict
+or certify that an aircraft is safe to fly.</p>
+<p>The proposed stack is Python/FastAPI, isolated parser and analysis workers,
+PostgreSQL, S3-compatible immutable object storage, Parquet/DuckDB, and a
+React/TypeScript frontend using MapLibre and Plotly. Start with ArduPilot tlog and
+DataFlash support, profile/parameter provenance, a synchronized timeline, a small
+validated diagnostic rule pack, and evidence-linked reports. Defer arbitrary
+scripts, broad autopilot coverage, predictive maintenance and elaborate 3D.</p>
+<p>The motivating incident illustrates why this distinction matters: a compass
+switch before a crash-check disarm is a useful association, but not proof that the
+compass caused the loss of control. In the inspected Copter 4.7.2 source, the
+reported <code>AngErr</code> is a thrust-vector tracking error, not a compass/yaw-error
+measurement.[1]</p>
+<h2 id="1-assumptions-and-boundaries">1. Assumptions and boundaries<a class="headerlink" href="#1-assumptions-and-boundaries" title="Permanent link">&para;</a></h2>
+<ol>
+<li>The described real log has not been supplied for this design review. Its
+   size, message counts, warnings, distances and measurements are treated as
+   user-reported observations, not independently reproduced results.</li>
+<li>The first release is post-flight and read-only. There is no MAVLink connection
+   to an aircraft, parameter-write endpoint, motor-control function or automated
+   flight approval.</li>
+<li>ArduPilot is the first fully supported ecosystem. PX4 later receives a
+   separate semantic adapter and rule pack, rather than inheriting Copter rules.</li>
+<li>Users may upload incomplete, corrupt, malicious or incorrectly labelled files.</li>
+<li>Uploaded locations, operator identities, routes and configurations are private
+   unless deliberately shared.</li>
+<li>Human-readable firmware strings may identify an official release or a custom
+   build. Semantics are only as trustworthy as the firmware match.</li>
+<li>Thresholds, time windows and performance budgets proposed below are design
+   decisions unless explicitly identified as firmware behavior or documentation.</li>
+<li>A profile describes an aircraft; a log describes an observation of that aircraft
+   at a particular time. Neither silently overrides the other.</li>
+</ol>
+<h2 id="2-product-vision-and-users">2. Product vision and users<a class="headerlink" href="#2-product-vision-and-users" title="Permanent link">&para;</a></h2>
+<h3 id="the-central-product-promise">The central product promise<a class="headerlink" href="#the-central-product-promise" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>Turn a flight log into a reproducible incident investigation: what happened,
+which explanations fit, what contradicts them, and what evidence is missing.</p>
+</blockquote>
+<p>The interface should answer these questions in order:</p>
+<ol>
+<li>Which aircraft, firmware, configuration and source streams are represented?</li>
+<li>Which portions of the recording are usable?</li>
+<li>What happened before, during and after each flight?</li>
+<li>Which observations indicate a problem?</li>
+<li>Which failure mechanisms are supported, and with what limitations?</li>
+<li>What additional data or safe inspection would discriminate among them?</li>
+</ol>
+<h3 id="different-users">Different users<a class="headerlink" href="#different-users" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>User</th>
+<th>Primary problem</th>
+<th>Product value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hobbyist or builder</td>
+<td>Many warnings, little understanding of their relationships</td>
+<td>Plain-language explanations, parameter context, precise evidence links</td>
+</tr>
+<tr>
+<td>Commercial operator</td>
+<td>Need incident triage and an operational record</td>
+<td>Repeatable reports, flight comparison, annotations and accountable review</td>
+</tr>
+<tr>
+<td>Fleet maintainer</td>
+<td>Need to distinguish a recurring hardware issue from changing flight conditions</td>
+<td>Per-aircraft histories, configuration-aware trends and maintenance records</td>
+</tr>
+<tr>
+<td>Developer or investigator</td>
+<td>Need reproducible details, not a dashboard assertion</td>
+<td>Raw record access, parser versions, full-resolution plots and competing hypotheses</td>
+</tr>
+</tbody>
+</table>
+<p>Use the same evidence model for all four. Adjust presentation depth rather than
+maintaining an opaque simplified diagnosis for beginners.</p>
+<h2 id="3-correctly-interpreting-the-motivating-incident">3. Correctly interpreting the motivating incident<a class="headerlink" href="#3-correctly-interpreting-the-motivating-incident" title="Permanent link">&para;</a></h2>
+<h3 id="facts-to-reconstruct-versus-conclusions-to-investigate">Facts to reconstruct versus conclusions to investigate<a class="headerlink" href="#facts-to-reconstruct-versus-conclusions-to-investigate" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Reported observation</th>
+<th>Defensible interpretation</th>
+<th>Unsupported shortcut to avoid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PreArm: Radio failsafe on</code>, throttle about 1000, threshold 975</td>
+<td>A radio-integrity/pre-arm problem was reported; investigate its actual trigger and timing</td>
+<td>“1000 is below 975” or “the threshold caused this”</td>
+</tr>
+<tr>
+<td>GPS “unable to configure band”</td>
+<td>A receiver configuration operation was rejected</td>
+<td>“GPS had no usable fix”</td>
+</tr>
+<tr>
+<td><code>Auto mode not armable</code></td>
+<td>Arming was rejected in that mode under the active configuration</td>
+<td>“GPS caused the arming rejection”</td>
+</tr>
+<tr>
+<td>EKF compass selection changed before disarm</td>
+<td>An estimator event preceded the reported crash-check action</td>
+<td>“Changing compass caused the crash”</td>
+</tr>
+<tr>
+<td><code>AngErr=160&gt;30</code></td>
+<td>The crash detector reported a large thrust-vector tracking error</td>
+<td>“The compass had a 160-degree yaw error”</td>
+</tr>
+<tr>
+<td><code>Compasses inconsistent</code> after both incidents</td>
+<td>Compass checks failed afterward</td>
+<td>“They were necessarily inconsistent before flight”</td>
+</tr>
+<tr>
+<td>Z vibration peak about 66</td>
+<td>A high processed vibration value was observed</td>
+<td>“Vibration caused the crash”, without timing and persistence</td>
+</tr>
+<tr>
+<td>Clipping count 316</td>
+<td>A counter or derived count needs sensor-instance and reset context</td>
+<td>Sum all sampled counter values and call that 316 new events</td>
+</tr>
+<tr>
+<td>Position estimate approached WP2 by 0.4 m</td>
+<td>A reported position series was close to the candidate waypoint</td>
+<td>“The aircraft physically reached it to 0.4 m accuracy”</td>
+</tr>
+</tbody>
+</table>
+<h3 id="critical-firmware-details">Critical firmware details<a class="headerlink" href="#critical-firmware-details" title="Permanent link">&para;</a></h3>
+<p>The <code>Copter-4.7.2</code> tag was verified at commit
+<code>fb773567896014da007bca58358704d4a0d8516f</code>. This makes a versioned semantic pack
+possible, but does not establish that the user's aircraft ran that exact binary.</p>
+<p>For that version, the crash check includes armed/not-landed and mode-related
+gates, filtered gravity-compensated acceleration below 3 m/s², estimated lean
+above 15 degrees, thrust-vector tracking error above 30 degrees, and a speed gate
+below 10 m/s when velocity is available. The gate must persist for a counter
+equivalent to nominally two seconds at the configured loop rate. The printed
+error is the value at triggering, not necessarily throughout the interval.
+The source's executable conditions should take precedence over stale comments.[1]</p>
+<p>This is not a physical-impact detector and does not identify a failed component.
+The estimated attitude itself can be wrong.</p>
+<p>For the same verified release:</p>
+<ul>
+<li><code>ARMING_SKIPCHK=128</code> skips the <strong>board-voltage check</strong>, not compass checking.
+  Do not decode this using a remembered <code>ARMING_CHECK</code> bit table.</li>
+<li><code>BATT_MONITOR=0</code> disables that battery-monitor instance. Inspect additional
+  instances before saying that all battery monitoring is absent.</li>
+<li><code>FS_GCS_ENABLE=0</code> disables the GCS-heartbeat failsafe. Whether this conflicts
+  with the intended operation depends on the control-link and mission policy.[2]</li>
+</ul>
+<h3 id="a-provisional-investigation-not-a-numeric-verdict">A provisional investigation, not a numeric verdict<a class="headerlink" href="#a-provisional-investigation-not-a-numeric-verdict" title="Permanent link">&para;</a></h3>
+<p>The reported observations justify investigating three competing mechanisms:</p>
+<ol>
+<li><strong>Estimator/magnetic inconsistency:</strong> supported by the reported compass
+   selection and inconsistency messages; weakened as a causal conclusion if the
+   affected core was not primary or the disagreement appears only after impact.</li>
+<li><strong>Mechanical/thrust-generation or configuration problem:</strong> compatible with
+   loss of thrust-vector tracking; needs motor mapping, target-versus-estimated
+   attitude, ESC evidence and inspection. Apparently successful takeoff is
+   context to consider, not a conclusive exclusion.</li>
+<li><strong>Vibration-driven estimation degradation:</strong> plausible only if excessive
+   vibration/clipping is shown before the loss of control, not just at impact.</li>
+</ol>
+<p>The radio/pre-arm failures should be a separate finding group. They may share
+underlying electrical issues, but that relationship must be demonstrated.
+The platform should not assign numerical root-cause probabilities from this
+description alone.</p>
+<h2 id="4-recommended-system-architecture">4. Recommended system architecture<a class="headerlink" href="#4-recommended-system-architecture" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>flowchart TD
+    U[Browser / operator] --&gt; API[FastAPI: auth, metadata, upload coordination]
+    API --&gt; PG[(PostgreSQL: jobs, profiles, events, findings, audit)]
+    API --&gt; UP[Restricted multipart upload session]
+    UP --&gt; RAW[(Quarantined object storage)]
+    PG --&gt; S[Job scheduler: leases and retries]
+    S --&gt; P[Isolated file parser]
+    RAW --&gt; P
+    P --&gt; N[Normalize identities, clocks, units, parameters]
+    N --&gt; PAR[(Immutable Parquet + dataset manifest)]
+    N --&gt; PG
+    PAR --&gt; A[Analysis worker: DuckDB + typed rules]
+    PG --&gt; A
+    A --&gt; F[Evidence graph and ranked hypotheses]
+    F --&gt; PG
+    API --&gt; Q[Bounded series-query workers]
+    PAR --&gt; Q
+    Q --&gt; API
+    API --&gt; UI[React: timeline, map, plots, evidence panel]
+    PG --&gt; R[Versioned report renderer]
+    PAR --&gt; R
+    R --&gt; REP[(PDF / shareable report artifacts)]
+</code></pre></div>
+<h3 id="technology-choices">Technology choices<a class="headerlink" href="#technology-choices" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Recommendation</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API</td>
+<td>FastAPI, Python, typed request/response models</td>
+<td>Same language as parsers and analysis; explicit contracts</td>
+</tr>
+<tr>
+<td>Job scheduling</td>
+<td>PostgreSQL job table with leased workers</td>
+<td>One operational datastore initially; durable retries and audit</td>
+</tr>
+<tr>
+<td>Parsing</td>
+<td>Pinned pymavlink adapters; pyulog for later ULog support</td>
+<td>Existing format implementations, wrapped by platform validation</td>
+</tr>
+<tr>
+<td>Raw/derived artifacts</td>
+<td>S3-compatible versioned storage</td>
+<td>Immutable source and output references; large files kept out of SQL</td>
+</tr>
+<tr>
+<td>Metadata</td>
+<td>PostgreSQL</td>
+<td>Transactions, tenant isolation, structured relationships</td>
+</tr>
+<tr>
+<td>Bulk samples</td>
+<td>Parquet grouped by dataset and signal family</td>
+<td>Efficient bounded interval and column reads</td>
+</tr>
+<tr>
+<td>Analysis/query engine</td>
+<td>DuckDB in separate resource-limited workers</td>
+<td>SQL over Parquet without introducing a distributed analytics cluster</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td>React + TypeScript, MapLibre, Plotly</td>
+<td>Linked investigation panels, maps and engineering plots</td>
+</tr>
+<tr>
+<td>First deployment</td>
+<td>Docker Compose, separate API/scheduler/worker services</td>
+<td>Easier operation than Kubernetes while retaining isolation boundaries</td>
+</tr>
+</tbody>
+</table>
+<p>Heavy parsing is not a FastAPI in-process background task. It belongs in a
+separate worker with resource limits and a durable job record.[14]</p>
+<p>Use at-least-once execution with idempotent outputs, not an “exactly once” claim.
+An analysis identity includes input manifest, profile snapshot, semantic pack,
+rule-set hash, analysis configuration and engine version.</p>
+<h3 id="job-lifecycle">Job lifecycle<a class="headerlink" href="#job-lifecycle" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>created -&gt; uploading -&gt; upload_verified -&gt; parsing -&gt; normalizing
+        -&gt; analysis_queued -&gt; analyzing -&gt; publishing -&gt; complete
+</code></pre></div>
+<p>There are explicit <code>failed</code>, <code>cancelled</code>, and <code>partial_dataset</code> outcomes.
+An interrupted upload is not the same as a fully received but truncated log.
+Publish a dataset manifest only after its referenced files pass integrity
+checks; failed work must not appear as a complete analysis.</p>
+<h2 id="5-data-model">5. Data model<a class="headerlink" href="#5-data-model" title="Permanent link">&para;</a></h2>
+<p>Avoid one table called <code>flights</code> containing everything.</p>
+<table>
+<thead>
+<tr>
+<th>Entity</th>
+<th>Purpose and important fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tenant / user / membership</td>
+<td>Ownership, roles, permissions, audit actor</td>
+</tr>
+<tr>
+<td>Drone</td>
+<td>Stable physical asset ID; not simply MAVLink system ID</td>
+</tr>
+<tr>
+<td>ProfileVersion</td>
+<td>Frame, propulsion, sensors, firmware, operating policy, effective interval, provenance</td>
+</tr>
+<tr>
+<td>SourceArtifact</td>
+<td>Hash, original name, size, object version, format, acquisition metadata</td>
+</tr>
+<tr>
+<td>ParseRun / DatasetVersion</td>
+<td>Parser/dialect hashes, diagnostics, clock mappings, coverage inventory, Parquet manifests</td>
+</tr>
+<tr>
+<td>SourceIdentity</td>
+<td>System/component IDs, topic instance, candidate role, link evidence, boot epoch</td>
+</tr>
+<tr>
+<td>RecordingSession</td>
+<td>Capture session that can contain several aircraft, reboots or flights</td>
+</tr>
+<tr>
+<td>ArmedEpisode</td>
+<td>Armed interval, possibly entirely on the ground</td>
+</tr>
+<tr>
+<td>FlightEpisode</td>
+<td>Observed/inferred takeoff and landing intervals, confidence, vehicle and clock epoch</td>
+</tr>
+<tr>
+<td>ParameterObservation</td>
+<td>Name, typed raw/decoded value, instance, source, requested/reported distinction</td>
+</tr>
+<tr>
+<td>ParameterSnapshot</td>
+<td>Values and completeness evidence at a time; missing indices and conflicts</td>
+</tr>
+<tr>
+<td>MissionTransaction / MissionVersion</td>
+<td>Direction, participants, mission type, items, acceptance evidence and uncertainty</td>
+</tr>
+<tr>
+<td>Observation</td>
+<td>Typed measurement, raw source locator, original time, normalized time, units and quality</td>
+</tr>
+<tr>
+<td>Event / EventEpisode</td>
+<td>Individual transitions/warnings and derived grouped occurrences</td>
+</tr>
+<tr>
+<td>RuleVersion</td>
+<td>Applicability, requirements, typed logic, thresholds, tests, validation status, content hash</td>
+</tr>
+<tr>
+<td>RuleEvaluation</td>
+<td>Triggered, not triggered, unassessable, or not applicable; coverage and reasons</td>
+</tr>
+<tr>
+<td>Finding / Hypothesis</td>
+<td>Claim, severity, support, contradictions, unknowns, ranking and evidence</td>
+</tr>
+<tr>
+<td>AnalysisRun</td>
+<td>Exact immutable inputs, rule versions, engine image, options and execution status</td>
+</tr>
+<tr>
+<td>Annotation / MaintenanceAction</td>
+<td>Human interpretation, inspected component, corrective action, eventual outcome</td>
+</tr>
+<tr>
+<td>Report / Share</td>
+<td>Versioned output, redactions, access scope, expiry and revocation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-canonical-observation">Example canonical observation<a class="headerlink" href="#example-canonical-observation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"dataset_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ds-17"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"artifact_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"log-7"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"record_ordinal"</span><span class="p">:</span><span class="w"> </span><span class="mi">21841</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"byte_offset"</span><span class="p">:</span><span class="w"> </span><span class="mi">893402</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"VIBRATION"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"system_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"component_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"instance"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"clock"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"epoch_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"boot-2"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"native_time_us"</span><span class="p">:</span><span class="w"> </span><span class="mi">192340000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"capture_time_us"</span><span class="p">:</span><span class="w"> </span><span class="mi">1790000192340000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"analysis_time_us"</span><span class="p">:</span><span class="w"> </span><span class="mi">192340000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"mapping_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"clock-map-4"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"uncertainty_us"</span><span class="p">:</span><span class="w"> </span><span class="mi">150000</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"signal"</span><span class="p">:</span><span class="w"> </span><span class="s2">"imu.vibration.z"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"raw_value"</span><span class="p">:</span><span class="w"> </span><span class="mf">66.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"normalized_value"</span><span class="p">:</span><span class="w"> </span><span class="mf">66.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"unit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"m/s^2"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"quality"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"crc_valid"</span><span class="p">,</span><span class="w"> </span><span class="s2">"capture_clock_unverified"</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This is a schema illustration, not an observation extracted from the motivating
+log. Use integer timestamps; timestamp precision is not timestamp accuracy.</p>
+<h3 id="example-finding">Example finding<a class="headerlink" href="#example-finding" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hypothesis"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"hypothesis"</span><span class="p">:</span><span class="w"> </span><span class="s2">"magnetic_estimation_problem"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"severity"</span><span class="p">:</span><span class="w"> </span><span class="s2">"critical"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"interval"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"start_us"</span><span class="p">:</span><span class="w"> </span><span class="mi">180000000</span><span class="p">,</span><span class="w"> </span><span class="nt">"end_us"</span><span class="p">:</span><span class="w"> </span><span class="mi">205000000</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"rule_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"compass-switch-loss-of-control@1.2"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"support"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"event-43"</span><span class="p">,</span><span class="w"> </span><span class="s2">"evidence-window-81"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"contradictions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"evidence-window-82"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"missing"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"primary_ekf_core"</span><span class="p">,</span><span class="w"> </span><span class="s2">"magnetic_innovations"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"ranking_score"</span><span class="p">:</span><span class="w"> </span><span class="mf">4.1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"calibrated_probability"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"confidence_label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"limited evidence"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"recommendation_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"obtain-onboard-log-and-inspect-magnetic-installation"</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>A ranking score such as 4.1 is an illustrative uncalibrated value, not “41% likely.”</p>
+<h2 id="6-parsing-and-data-integrity">6. Parsing and data integrity<a class="headerlink" href="#6-parsing-and-data-integrity" title="Permanent link">&para;</a></h2>
+<h3 id="format-detection-and-isolation">Format detection and isolation<a class="headerlink" href="#format-detection-and-isolation" title="Permanent link">&para;</a></h3>
+<p>Use explicit file-only adapters:</p>
+<div class="highlight"><pre><span></span><code>adapters\ardupilot_tlog
+adapters\ardupilot_dataflash
+adapters\px4_ulog
+adapters\mapped_csv
+</code></pre></div>
+<p>Inspect file signatures and record structure, not just the extension.
+Pymavlink's convenience dispatcher is not a universal detector: it includes
+network/device transports and other behaviors that an upload API should never
+expose. Do not pass an arbitrary user string into that dispatcher.[3]</p>
+<p>Run parsers with no network or credentials, read-only staged input, isolated
+scratch storage, and CPU, memory, process, output-size and wall-time budgets.
+Reject unsupported incompatibility flags. Keep the original file even when
+salvaging its usable records.</p>
+<h3 id="mission-planner-tlog">Mission Planner tlog<a class="headerlink" href="#mission-planner-tlog" title="Permanent link">&para;</a></h3>
+<p>The inspected Mission Planner writer prefixes packet bytes with an eight-byte
+big-endian Unix-epoch microsecond timestamp. It records both outgoing and
+incoming traffic, so call this capture/write time rather than assuming it is
+always a sensor receive time.[4]</p>
+<p>Preserve the prefix bytes. Pymavlink exposes low timestamp bits as a link value,
+but the inspected Mission Planner writer does not explicitly reserve them.
+Do not treat that decoded value as proof of multiple physical links for every
+Mission Planner recording.[3][4]</p>
+<h3 id="mavlink-validation">MAVLink validation<a class="headerlink" href="#mavlink-validation" title="Permanent link">&para;</a></h3>
+<p>Classify every frame as validated, truncated, CRC-failed, signature-unverified,
+signature-failed, unknown-definition, or unsupported-framing as appropriate.
+CRC validity is not authentication. A present signature is not a verified
+signature without the necessary validation context.</p>
+<p>Robust parsing can return bad-data records; it does not repair information.
+Unknown message definitions may be retained by a parser without undergoing the
+same checks as known messages. Store unknown payloads and offsets so a later
+dialect version can reinterpret them.[3][5]</p>
+<p>For MAVLink2, distinguish valid trailing-zero payload truncation from an
+incomplete/corrupted frame. Preserve whether optional fields were actually
+available before treating a decoded default as a physical measurement.</p>
+<h3 id="identities-and-message-loss">Identities and message loss<a class="headerlink" href="#identities-and-message-loss" title="Permanent link">&para;</a></h3>
+<p>Use sender system/component IDs, available link provenance, and boot/session
+identity. Separate source from command target. Identify the flight-controller
+stream through heartbeat type/autopilot and corroborating messages, not “ID 1
+must be the drone.” A single recording can contain relayed duplicates, GCS
+heartbeats, radio reports and more than one aircraft.[5]</p>
+<p>Sequence numbers wrap at 256. Evaluate continuity only within defensible
+source/channel/session streams. A gap does not uniquely prove radio loss:
+filtering, forwarding, reordering and mixed channels also matter.
+Report a conditional loss estimate with its assumptions rather than a universal
+“packet loss percentage.”</p>
+<h3 id="statustext">STATUSTEXT<a class="headerlink" href="#statustext" title="Permanent link">&para;</a></h3>
+<p>Reassemble long MAVLink2 text using sender/session/message ID and chunk sequence.
+Preserve partial or conflicting assemblies. Reconstruct bytes before decoding
+UTF-8 so a character split across chunks is not corrupted.[5]</p>
+<p>Store every warning occurrence. A UI episode such as “Radio failsafe ×47 across
+4 minutes” is a derived view, not 47 independent confirmations and not proof
+that a failsafe flag remained continuously asserted for all four minutes.</p>
+<h3 id="dataflash-ulog-and-csv">DataFlash, ULog and CSV<a class="headerlink" href="#dataflash-ulog-and-csv" title="Permanent link">&para;</a></h3>
+<p>DataFlash adapters retain embedded format, unit, multiplier and instance
+definitions. Preserve native boot timestamps even if a parser supplies a
+derived wall-clock timestamp. PX4 ULog uses its own formats, subscription IDs,
+instances and dropout records; do not force these into fake MAVLink IDs.[3][6]</p>
+<p>CSV import requires an explicit mapping for timestamps, timezone/domain,
+identity, units and null values. Never execute user-supplied timestamp
+expressions. Units inferred from column names should remain suggestions pending
+confirmation.</p>
+<h2 id="7-clock-model-and-synchronization">7. Clock model and synchronization<a class="headerlink" href="#7-clock-model-and-synchronization" title="Permanent link">&para;</a></h2>
+<p>Maintain at least:</p>
+<ol>
+<li>Capture clock.</li>
+<li>Vehicle boot clock.</li>
+<li>GPS/UTC clock when usable.</li>
+<li>Derived investigation clock with mapping uncertainty.</li>
+</ol>
+<p><code>SYSTEM_TIME</code> can provide boot/Unix relationships. Some timestamp fields permit
+either boot-relative or epoch values; interpretation must follow the message
+definition, not one global heuristic.[5]</p>
+<p>Segment credible reboot epochs. Distinguish reboot, delayed delivery and
+32-bit boot-millisecond wrap. Record inconsistent anchors and clock jumps.
+Capture minus sensor time is not automatically network latency.</p>
+<p>When combining onboard and telemetry logs, align through multiple shared
+landmarks and clock anchors, retain residual error, and make an uncertain match
+visible. Two records separated by five seconds in display time may not have a
+defensible causal order if the alignment uncertainty is larger.</p>
+<p>Never interpolate across reboot, estimator-origin reset, long data gaps or
+incompatible frames. Hold discrete states between observations with a visible
+freshness limit. Interpolated chart points must never masquerade as original
+evidence.</p>
+<h2 id="8-profile-and-parameter-audit">8. Profile and parameter audit<a class="headerlink" href="#8-profile-and-parameter-audit" title="Permanent link">&para;</a></h2>
+<p>Build this early: diagnostic thresholds and applicability depend on it.</p>
+<p>A profile should contain:</p>
+<ul>
+<li>Frame class/type and motor geometry.</li>
+<li>Motor/ESC/propeller specifications and channel-function mapping where known.</li>
+<li>Firmware name/version, git identity, board and build information.</li>
+<li>Sensor instances, orientations, device IDs and intended estimator sources.</li>
+<li>Battery chemistry/cell count/capacity and monitor assignments.</li>
+<li>Intended control links and failsafe policy.</li>
+<li>Payload and typical operating envelope.</li>
+<li>Maintenance changes, configuration versions and known limitations.</li>
+</ul>
+<p>Each field records whether it is operator-declared, firmware-reported, inferred
+or externally verified. “Quadrotor” in a heartbeat does not alone identify an
+X-frame geometry, and a generic GPS message does not establish a u-blox model.</p>
+<h3 id="parameter-completeness">Parameter completeness<a class="headerlink" href="#parameter-completeness" title="Permanent link">&para;</a></h3>
+<p>973 observed names does not prove a full snapshot. Track <code>param_count</code>, index
+coverage, sender component, request/response context, repeated values and changes
+within a collection epoch. A snapshot can be complete, partial, internally
+inconsistent or of unknown completeness.[7]</p>
+<p>Separate a requested <code>PARAM_SET</code> from a reported <code>PARAM_VALUE</code>. Decode the
+advertised parameter type and supported value encoding; preserve raw bytes.
+Do not treat an unacknowledged request as an effective configuration change.
+For restart-required parameters, reported stored value and active runtime value
+may differ; retain that uncertainty.</p>
+<h3 id="audits-and-comparisons">Audits and comparisons<a class="headerlink" href="#audits-and-comparisons" title="Permanent link">&para;</a></h3>
+<p>Version parameter metadata by exact firmware where possible. Diff changes in
+value, type, meaning, availability and completeness. Do not report a missing
+parameter in a partial snapshot as “reset to default.”</p>
+<p>A known-good preset is a <strong>scoped reference</strong>, not a universal safety certificate:
+it needs frame, hardware, firmware, payload/mission assumptions, provenance,
+validation owner and expiry/review state. Show why a mismatch matters. Never
+automatically apply a preset or disable arming checks.</p>
+<h2 id="9-diagnosis-engine">9. Diagnosis engine<a class="headerlink" href="#9-diagnosis-engine" title="Permanent link">&para;</a></h2>
+<h3 id="stage-a-establish-observations-and-operating-context">Stage A: establish observations and operating context<a class="headerlink" href="#stage-a-establish-observations-and-operating-context" title="Permanent link">&para;</a></h3>
+<p>Before ranking causes, reconstruct:</p>
+<ul>
+<li>Vehicle/source and boot identity.</li>
+<li>Armed episodes versus observed/inferred airborne flights.</li>
+<li>Mode, mission and parameter state.</li>
+<li>Available channels, rates, gaps and invalid samples.</li>
+<li>Relevant pre-arm, takeoff, transition, flight, landing and post-event phases.</li>
+</ul>
+<p>An armed vehicle on a bench is not automatically an airborne flight. Use
+flight-controller heartbeat and landed-state reports where present; otherwise
+label phase estimates and their uncertainty.[8]</p>
+<h3 id="stage-b-derive-events-and-indicators">Stage B: derive events and indicators<a class="headerlink" href="#stage-b-derive-events-and-indicators" title="Permanent link">&para;</a></h3>
+<p>Examples: an arming rejection, a compass-selection change, a rise in clipping,
+sustained tracking error, a voltage sag, a command-output plateau.</p>
+<p>Use full-resolution observations for detection. A plot's downsampled line is
+not the input to the diagnostic engine.</p>
+<h3 id="stage-c-evaluate-hypothesis-rules">Stage C: evaluate hypothesis rules<a class="headerlink" href="#stage-c-evaluate-hypothesis-rules" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">compass-switch-before-crash-check</span>
+<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="nt">semantic_pack</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arducopter-4.7.2</span>
+<span class="nt">requires</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">events</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crash_check_disarm</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ekf_compass_selection_change</span>
+<span class="w">  </span><span class="nt">context</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vehicle_identity</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clock_epoch</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flight_episode</span>
+<span class="nt">correlate</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">same_vehicle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">same_epoch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">before_seconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="nt">support</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">compass_change_in_active_ekf_core</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">magnetic_innovation_failure_before_tracking_loss</span>
+<span class="nt">contradictions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">first_attitude_failure_precedes_compass_change</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">changed_core_not_primary</span>
+<span class="nt">unknowns</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">missing_primary_core_identity</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">missing_magnetic_innovations</span>
+<span class="nt">output</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">observed_pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">compass_event_before_crash_check</span>
+<span class="w">  </span><span class="nt">hypotheses</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">magnetic_estimation_problem</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vibration_related_estimator_degradation</span>
+<span class="w">  </span><span class="nt">probability</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+</code></pre></div>
+<p>This is an illustrative DSL, not executed firmware logic. Its 20-second
+correlation window is a proposed screening window, not a documented causal
+threshold.</p>
+<p>Rule results have four states: <code>triggered</code>, <code>not_triggered</code>, <code>unassessable</code>,
+<code>not_applicable</code>. A failed applicability or coverage check is not a healthy
+result.</p>
+<h3 id="stage-d-rank-without-pretending-to-know-probabilities">Stage D: rank without pretending to know probabilities<a class="headerlink" href="#stage-d-rank-without-pretending-to-know-probabilities" title="Permanent link">&para;</a></h3>
+<p>Start with an explainable, expert-reviewed ranking:</p>
+<div class="highlight"><pre><span></span><code>rank(H) =
+    configured prior weight
+  + capped support from each evidence family
+  - explicit contradictory evidence
+</code></pre></div>
+<p>Evidence families might be magnetic/estimator, inertial/vibration, propulsion,
+power, navigation and communications. Source integrity, timestamp uncertainty,
+phase relevance and sampling coverage govern whether evidence is usable.</p>
+<p>Do not count every repeated STATUSTEXT message, derivative feature and plot
+summary as independent support. Do not treat two flights on the same hardware
+and configuration as independent laboratory replications.</p>
+<p>Display four separate concepts:</p>
+<ul>
+<li>Severity if the mechanism is real.</li>
+<li>Comparative investigation priority.</li>
+<li>Evidence completeness/quality.</li>
+<li>Calibrated probability, <strong>only if validated for that task and population</strong>.</li>
+</ul>
+<p>Initially use labels such as strong support, mixed support and limited evidence
+with explanations, not “92% compass failure.” Future probability calibration
+requires adjudicated outcomes and held-out evaluation.</p>
+<h3 id="stage-e-recommend-discriminating-evidence-and-safe-actions">Stage E: recommend discriminating evidence and safe actions<a class="headerlink" href="#stage-e-recommend-discriminating-evidence-and-safe-actions" title="Permanent link">&para;</a></h3>
+<p>For every hypothesis, answer:</p>
+<blockquote>
+<p>What observation would most clearly distinguish this from its nearest rival?</p>
+</blockquote>
+<p>Examples are onboard magnetic innovations, measured ESC RPM/current, a complete
+parameter snapshot, or qualified inspection of mounting and propulsion.
+Post-crash recommendations should prioritize safe, propellers-removed inspection
+and review of existing evidence—not another Auto flight or force-arming.</p>
+<h2 id="10-eight-concrete-rule-designs">10. Eight concrete rule designs<a class="headerlink" href="#10-eight-concrete-rule-designs" title="Permanent link">&para;</a></h2>
+<p>The persistence windows below are initial configurable analysis choices.
+Firmware gates are separately versioned and must not be confused with them.</p>
+<h3 id="rule-1-repeated-pre-arm-radio-integrity-failure">Rule 1: repeated pre-arm radio-integrity failure<a class="headerlink" href="#rule-1-repeated-pre-arm-radio-integrity-failure" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Trigger:</strong> repeated <code>Radio failsafe on</code> warnings or an explicitly observed
+  failsafe state during a pre-arm episode.</li>
+<li><strong>Evidence:</strong> mapped throttle input, <code>RCMAP_THROTTLE</code>, calibration, reversal,
+  freshness, receiver failsafe indications, RC options, override activity and
+  timeout settings.</li>
+<li><strong>Logic:</strong> distinguish below-threshold input, lost valid updates and receiver/
+  override-related mechanisms. In the motivating report, 1000 exceeds 975, so
+  those samples do not establish the below-threshold mechanism.</li>
+<li><strong>Exclusions:</strong> GCS-origin RC messages, old retained values, sparse observations
+  that cannot demonstrate fresh receiver updates.</li>
+<li><strong>Output:</strong> an arming blocker with unresolved or supported trigger branches,
+  not a fabricated adjustment to <code>FS_THR_VALUE</code>.</li>
+</ul>
+<p>Copter's channel state can include overrides; streamed RC values are not an
+independent capture of the receiver wire protocol.[9]</p>
+<h3 id="rule-2-arming-rejected-by-mode-or-throttle-state">Rule 2: arming rejected by mode or throttle state<a class="headerlink" href="#rule-2-arming-rejected-by-mode-or-throttle-state" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Trigger:</strong> <code>Auto mode not armable</code> or <code>Throttle too high</code>.</li>
+<li><strong>Evidence:</strong> exact firmware semantics, current mode, arming-command method,
+  Auto options, calibrated throttle/control demand and contemporaneous warnings.</li>
+<li><strong>Logic:</strong> assess each rejected attempt separately. Copter 4.7.2 has an Auto
+  allow-arming option and mode-specific conditions; throttle-high checking is
+  different from low-throttle failsafe.</li>
+<li><strong>Exclusions:</strong> an old mission upload or GPS configuration message merely
+  appearing nearby.</li>
+<li><strong>Output:</strong> distinct rejection reasons, not a single “GPS arming failure.”</li>
+</ul>
+<p>The GPS band warning should create a configuration warning whose operational
+impact remains conditional on actual fix/accuracy and estimator acceptance.[9]</p>
+<h3 id="rule-3-estimatorcompass-event-before-crash-check-disarm">Rule 3: estimator/compass event before crash-check disarm<a class="headerlink" href="#rule-3-estimatorcompass-event-before-crash-check-disarm" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Trigger:</strong> correctly classified compass/core/yaw event within a proposed
+  20-second pre-disarm window.</li>
+<li><strong>Evidence:</strong> exact warning text, active EKF core, compass device mapping,
+  innovations, target/estimated attitude, current and vibration history.</li>
+<li><strong>Logic:</strong> distinguish compass selection, EKF lane switch, yaw-source change
+  and yaw reset. Record onset ordering relative to tracking deterioration.</li>
+<li><strong>Exclusions:</strong> inactive-core-only changes; post-impact disagreement used as
+  proof of pre-impact failure; correlation based on uncertain clocks.</li>
+<li><strong>Output:</strong> supported chronology and competing hypotheses. Mark any causal
+  interpretation as limited when internal EKF evidence is unavailable.</li>
+</ul>
+<p>Compass switching may be an estimator recovery action rather than the initiating
+fault.[10]</p>
+<h3 id="rule-4-loss-of-thrust-vector-tracking">Rule 4: loss of thrust-vector tracking<a class="headerlink" href="#rule-4-loss-of-thrust-vector-tracking" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Trigger:</strong> controller/estimate divergence sustained for a configurable
+  0.5–1 second screening interval, or an observed crash-check disarm message.</li>
+<li><strong>Evidence:</strong> target and estimated orientation, body rates, outputs, filtered
+  acceleration, speed and exact detector semantics.</li>
+<li><strong>Logic:</strong> distinguish an implausible target, a state-estimate jump, and failure
+  to follow a plausible target. Reproduce internal crash gates only if the
+  necessary signals and sampling permit it.</li>
+<li><strong>Exclusions:</strong> mismatched coordinate frames, comparing unaligned signals,
+  treating <code>AngErr</code> as full yaw error.</li>
+<li><strong>Output:</strong> a tracking failure; possible control, estimation and thrust causes
+  remain separate.</li>
+</ul>
+<p>For Copter 4.7.2, use the thrust-vector definition and executable crash gates.[1]</p>
+<h3 id="rule-5-sustained-vibration-and-accelerometer-clipping">Rule 5: sustained vibration and accelerometer clipping<a class="headerlink" href="#rule-5-sustained-vibration-and-accelerometer-clipping" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Trigger:</strong> initial screening above 30 m/s² for 2 seconds, above 60 m/s² for
+  1 second, or positive clipping increments in airborne pre-event intervals.</li>
+<li><strong>Evidence:</strong> per-instance vibration and clipping, boot boundaries, sample
+  intervals and phase.</li>
+<li><strong>Logic:</strong> calculate positive counter increments within a valid epoch; report
+  increments over known intervals rather than inventing individual clip times.</li>
+<li><strong>Exclusions:</strong> impact/handling-only peaks, counter resets, mixed IMU instances,
+  and summing cumulative samples.</li>
+<li><strong>Output:</strong> pre-event vibration exposure, impact-only exposure or insufficient
+  temporal evidence.</li>
+</ul>
+<p>ArduPilot's documentation gives 30/60 as useful vibration guidance, not universal
+crash thresholds. Its vibration metric is filtered, not instantaneous
+acceleration. DataFlash instance fields differ from MAVLink's clipping0/1/2
+representation, so the semantic adapter must normalize them.[11]</p>
+<h3 id="rule-6-abnormal-propulsion-command-distribution">Rule 6: abnormal propulsion-command distribution<a class="headerlink" href="#rule-6-abnormal-propulsion-command-distribution" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Trigger:</strong> output imbalance/saturation persisting in a comparable, nominally
+  steady phase; initially use a configurable two-second screening interval.</li>
+<li><strong>Evidence:</strong> actual channel-function mapping, frame geometry, output limits,
+  desired attitude/rates, achieved motion, ESC RPM/current where available.</li>
+<li><strong>Logic:</strong> compare outputs with expected control demands, not just their spread.</li>
+<li><strong>Exclusions:</strong> takeoff transients, aggressive maneuvers, yaw commands, wind,
+  asymmetric payload and different mixer configurations.</li>
+<li><strong>Output:</strong> command-distribution anomaly. Without measured motor response or
+  inspection, do not claim a particular motor/propeller has failed.</li>
+</ul>
+<p>Motor commands are not measured thrust. Wrong geometry/order/direction requires
+additional corroboration.</p>
+<h3 id="rule-7-power-monitoring-gap-or-voltage-anomaly">Rule 7: power monitoring gap or voltage anomaly<a class="headerlink" href="#rule-7-power-monitoring-gap-or-voltage-anomaly" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Trigger A:</strong> no usable propulsion battery or board-supply observations for
+  the operating policy.</li>
+<li><strong>Trigger B:</strong> sustained sag/undervoltage against an appropriate configured
+  threshold with valid current/load context.</li>
+<li><strong>Evidence:</strong> all monitor instances, voltage/current, board supply, resets,
+  battery profile and arming-check configuration.</li>
+<li><strong>Logic:</strong> separate an observability defect from observed power degradation.</li>
+<li><strong>Exclusions:</strong> invalid sentinels, disconnected/unused monitor instances,
+  chemistry/cell-count mismatch and sparse unaligned current measurements.</li>
+<li><strong>Output:</strong> monitoring coverage gap, observed voltage anomaly, or unassessable
+  battery condition. <code>ARMING_SKIPCHK=128</code> is contextual risk in the verified
+  firmware, not proof of an electrical cause.[2]</li>
+</ul>
+<h3 id="rule-8-communicationnavigation-policy-mismatch">Rule 8: communication/navigation policy mismatch<a class="headerlink" href="#rule-8-communicationnavigation-policy-mismatch" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Trigger:</strong> required RC/GCS/GNSS service becomes unavailable, or configured
+  failsafe behavior contradicts the declared operating policy.</li>
+<li><strong>Evidence:</strong> relevant source freshness, explicit failsafe events, GCS role,
+  RC availability, mode, mission policy, fix/accuracy and estimator use.</li>
+<li><strong>Logic:</strong> distinguish a radio's status report from actual vehicle link health
+  and a GNSS configuration warning from failed positioning.</li>
+<li><strong>Exclusions:</strong> optional GCS loss during a deliberately permitted autonomous
+  mission; message absence when a topic was never streamed.</li>
+<li><strong>Output:</strong> actionable policy mismatch or loss evidence, not “unsafe because
+  FS_GCS_ENABLE is zero.”</li>
+</ul>
+<h2 id="11-mission-reconstruction-and-analysis">11. Mission reconstruction and analysis<a class="headerlink" href="#11-mission-reconstruction-and-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="treat-uploads-as-transactions-with-uncertain-outcomes">Treat uploads as transactions with uncertain outcomes<a class="headerlink" href="#treat-uploads-as-transactions-with-uncertain-outcomes" title="Permanent link">&para;</a></h3>
+<p>Recognize the direction of <code>MISSION_COUNT</code>, requests, items and ACKs.
+An upload and a download can carry similar messages in opposite directions.
+Retransmissions are not automatically new plans.[12]</p>
+<p>Maintain separate:</p>
+<ol>
+<li>GCS-intended mission versions.</li>
+<li>Observed upload/download transactions.</li>
+<li>Acceptance evidence.</li>
+<li>Inferred/confirmed onboard mission state.</li>
+<li>Execution observations.</li>
+</ol>
+<p>A confirmed shorter full upload replaces the earlier plan; do not keep old
+trailing points. Partial writes need a known baseline. The MAVLink documentation
+notes non-atomic ArduPilot upload behavior; therefore, do not guarantee that the
+last accepted mission remains onboard after an interrupted overwrite. Model
+possible partial modification unless the exact firmware/transaction evidence
+establishes otherwise.[12]</p>
+<p>Use available opaque plan IDs as corroboration, not universal identifiers.
+Missing or zero extension fields do not establish plan identity.</p>
+<h3 id="reached-versus-observed-near">Reached versus observed near<a class="headerlink" href="#reached-versus-observed-near" title="Permanent link">&para;</a></h3>
+<p>Use explicit statuses:</p>
+<div class="highlight"><pre><span></span><code>reported_complete
+geometry_consistent_with_completion
+completion_not_observed
+not_visited_in_observed_trajectory
+unassessable
+</code></pre></div>
+<p>Store the command itself. A takeoff item is not an ordinary horizontal waypoint.
+ArduPilot commonly uses sequence zero for home; never relabel by display order
+without retaining original sequence numbers.[12]</p>
+<p>A missing <code>MISSION_ITEM_REACHED</code> does not prove failure to reach, and a
+<code>MISSION_CURRENT</code> advance can reflect a jump or set-current operation.
+Generic MAVLink waypoint fields do not guarantee that a given Copter release
+implements each field. In particular, do not invent a universal waypoint yaw
+acceptance condition.[12][13]</p>
+<p>For the reported 0.4 m approach, show:</p>
+<ul>
+<li>Candidate mission version and item command/frame.</li>
+<li>Nearest recorded horizontal distance.</li>
+<li>Vertical error only when frames/datums are compatible.</li>
+<li>GPS/estimator uncertainty and observation gap.</li>
+<li>Whether interpolation was used.</li>
+<li>Whether an execution completion message was observed.</li>
+</ul>
+<p>Call the 21.6 m value a recorded-position distance to a waypoint unless an
+along-path definition and correct active plan are established.</p>
+<h3 id="geometry-and-mission-warnings">Geometry and mission warnings<a class="headerlink" href="#geometry-and-mission-warnings" title="Permanent link">&para;</a></h3>
+<p>Distinguish MSL, ellipsoid, home-relative and terrain-relative altitude.
+Home-relative altitude is not generally AGL. Preserve local NED/ENU and body
+FRD semantics; local frames require a known origin. GPS course is not vehicle
+heading, and the estimated global position is not physical ground truth.[5][13]</p>
+<p>Cross-track distance must name its reference: a straight mission segment is not
+the controller's curved/spline path. Plan-level battery margin is unassessable
+without sufficient battery/energy observations and a validated load model;
+distance alone is not a credible energy estimate.</p>
+<h2 id="12-interface-and-reports">12. Interface and reports<a class="headerlink" href="#12-interface-and-reports" title="Permanent link">&para;</a></h2>
+<h3 id="investigation-screen">Investigation screen<a class="headerlink" href="#investigation-screen" title="Permanent link">&para;</a></h3>
+<p>Use one time-selection model shared by:</p>
+<ul>
+<li>Severity-filtered event timeline.</li>
+<li>Map and planned/flown path.</li>
+<li>Linked engineering plots.</li>
+<li>Parameter changes and flight-phase markers.</li>
+<li>Hypothesis cards with support/contradictions.</li>
+<li>Raw record/evidence inspector.</li>
+</ul>
+<p>Clicking a finding selects its interval and opens the exact source records plus
+bounded before/after context. A warning episode expands to individual messages.
+Show missing/invalid data as gaps, not zeros.</p>
+<p>Compare flights by elapsed time from takeoff or equivalent mission phase while
+retaining actual timestamps and durations. Do not automatically equate “WP2”
+between different mission versions.</p>
+<h3 id="3d">3D<a class="headerlink" href="#3d" title="Permanent link">&para;</a></h3>
+<p>Start with correct 2D and altitude plots. Later add 3D with explicit altitude
+datum and frame conversion. Interpolate quaternions with sign continuity;
+unwrap displayed angles and stop interpolation at gaps/resets. A visually smooth
+trajectory must not imply more accurate measurements.</p>
+<h3 id="reports">Reports<a class="headerlink" href="#reports" title="Permanent link">&para;</a></h3>
+<p>Each report includes:</p>
+<ol>
+<li>Scope, aircraft/profile identity, firmware match and data limitations.</li>
+<li>Observed incident sequence.</li>
+<li>Ranked hypotheses and supporting/contradicting evidence.</li>
+<li>Parameter and monitoring concerns.</li>
+<li>Missing evidence and recommended safe follow-up.</li>
+<li>Analysis/rule versions and immutable evidence links.</li>
+</ol>
+<p>An optional LLM can phrase already-approved structured findings. It must not
+invent diagnoses, thresholds, source citations or repair instructions.
+Log strings are untrusted input and must not become model instructions.
+Provide a deterministic report fallback.</p>
+<h2 id="13-fleet-trends-and-maintenance">13. Fleet trends and maintenance<a class="headerlink" href="#13-fleet-trends-and-maintenance" title="Permanent link">&para;</a></h2>
+<p>First implement condition trends, not remaining-useful-life claims.</p>
+<p>Compare like-for-like flight phases while accounting for:</p>
+<ul>
+<li>Firmware/profile revisions and sensor replacement.</li>
+<li>Payload, battery identity, temperature and environment.</li>
+<li>Maneuver intensity, duration and recording rates.</li>
+<li>Sensor instances, units and signal coverage.</li>
+</ul>
+<p>A vibration trend is not automatically motor wear. Motor wear needs appropriate
+response measurements and maintenance outcomes. Battery degradation needs
+consistent battery identity and comparable charge/load/temperature conditions.
+Record maintenance actions, replaced parts, inspection findings and subsequent
+flights so useful labels can accumulate.</p>
+<p>Do not compare a sparse radio log with a high-rate onboard log as if their peaks
+and counter visibility were directly equivalent.</p>
+<h2 id="14-rule-extensibility">14. Rule extensibility<a class="headerlink" href="#14-rule-extensibility" title="Permanent link">&para;</a></h2>
+<h3 id="mvp-a-bounded-dsl">MVP: a bounded DSL<a class="headerlink" href="#mvp-a-bounded-dsl" title="Permanent link">&para;</a></h3>
+<p>Allow registered signals, comparisons, durations, aggregates, temporal joins,
+exclusions and templated evidence. Validate units, expected types, applicable
+firmware and required coverage at rule creation.</p>
+<p>Every shared rule needs a version/hash, author, tests, description, applicability,
+known confounders, validation state and review history. A tenant pins a rule
+version; publishing an update must not silently rewrite old investigations.</p>
+<h3 id="later-isolated-executable-extensions">Later: isolated executable extensions<a class="headerlink" href="#later-isolated-executable-extensions" title="Permanent link">&para;</a></h3>
+<p>Do not execute user Python in the API or privileged analysis process. If scripts
+become necessary, use reviewed immutable packages in disposable sandboxes:
+no network, no secrets, read-only scoped inputs, strict CPU/RAM/process/output
+budgets, deadlines and validated result schemas. Do not expose a container-engine
+socket. Hostile public plugins need stronger isolation than ordinary shared
+containers before launch.</p>
+<h2 id="15-testing-and-evaluation">15. Testing and evaluation<a class="headerlink" href="#15-testing-and-evaluation" title="Permanent link">&para;</a></h2>
+<h3 id="four-test-layers">Four test layers<a class="headerlink" href="#four-test-layers" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Parser fixtures:</strong> valid formats, wrong suffixes, truncated frames, missing
+   chunks, unknown messages, CRC/signature states, reboots and corrupted regions.</li>
+<li><strong>Semantic fixtures:</strong> version-specific parameter bitmasks, message units,
+   instance mappings, time anchors, arming versus airborne state, mission
+   retransmission/partial-write behavior.</li>
+<li><strong>Diagnostic fixtures:</strong> positive cases, healthy counterexamples, missing
+   channels, contradictory evidence and known confounders.</li>
+<li><strong>End-to-end investigations:</strong> immutable expected event sequences, evidence
+   locators, findings and report versions.</li>
+</ol>
+<p>The motivating log should become a manually annotated regression case, ideally
+paired with its onboard logs and inspection outcome. Do not make it the entire
+evaluation set.</p>
+<h3 id="ground-truth-levels">Ground-truth levels<a class="headerlink" href="#ground-truth-levels" title="Permanent link">&para;</a></h3>
+<p>Distinguish hardware-confirmed causes, expert-adjudicated interpretations and
+weak labels from operator narratives. Do not train or score “root cause” against
+an unverified description as if it were ground truth.</p>
+<p>Include healthy flights, recoveries, aborted takeoffs, bench activity and benign
+warnings—not only crashes. Split by aircraft/operator and time; keep duplicate
+recordings and related flights out of opposing splits.</p>
+<p>Measure:</p>
+<ul>
+<li>False alerts per flight-hour and per flight phase.</li>
+<li>Precision/recall of observable events.</li>
+<li>Top-k hypothesis recall on adjudicated incidents.</li>
+<li>Correctness of cited evidence and timeline order.</li>
+<li>Abstention and coverage when signals are missing.</li>
+<li>Calibration only for outputs that claim probabilities.</li>
+<li>Analyst time to identify and verify a useful explanation.</li>
+</ul>
+<p>A high recall model that blames a compass on every crash is not a useful product.</p>
+<h2 id="16-security-privacy-and-operational-reliability">16. Security, privacy and operational reliability<a class="headerlink" href="#16-security-privacy-and-operational-reliability" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Tenant authorization must follow every data/evidence relationship.</li>
+<li>Treat parser code as exposed to hostile files. Sandbox and fuzz it.</li>
+<li>Validate actual file sizes and content; bound expansion if archives are later
+  accepted. Do not trust filenames, MIME types or client-reported hashes.</li>
+<li>Use unique immutable object versions; object-store multipart ETags are not a
+  substitute for the platform's chosen integrity hash.</li>
+<li>Keep tenant-scoped caches and deduplication semantics to avoid exposing another
+  tenant's upload or analysis.</li>
+<li>Redact home coordinates, routes, identities and timestamps where required.
+  Redaction must cover PDFs, metadata, downloadable artifacts and maps, not just
+  visible text.</li>
+<li>Use revocable application-level share tokens with narrow scope and expiry.
+  Issue short-lived object URLs only after authorization; presigned storage URLs
+  are bearer credentials and may be reused until expiry.[15]</li>
+<li>Define deletion across raw data, Parquet, indexes, caches, reports, shares and
+  backups; state backup-retention limits clearly.</li>
+<li>Maintain access logs, restore tests and incident procedures.</li>
+<li>Explain third-party map/LLM processing. Offer a no-external-services workflow
+  for sensitive logs.</li>
+</ul>
+<h2 id="17-performance-and-large-log-design">17. Performance and large-log design<a class="headerlink" href="#17-performance-and-large-log-design" title="Permanent link">&para;</a></h2>
+<p>Define test workloads rather than inventing performance claims:</p>
+<table>
+<thead>
+<tr>
+<th>Workload</th>
+<th>What to measure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Roughly 55,000-message tlog</td>
+<td>Time to first useful preview and final analysis</td>
+</tr>
+<tr>
+<td>Ten-million-message onboard dataset</td>
+<td>Parse throughput, peak RAM and scratch storage</td>
+</tr>
+<tr>
+<td>1 GB interrupted upload</td>
+<td>Resume behavior, integrity validation and cleanup</td>
+</tr>
+<tr>
+<td>Multiple tenants</td>
+<td>Queue fairness, cancellation and query latency under load</td>
+</tr>
+<tr>
+<td>Corrupt/high-cardinality data</td>
+<td>Resource ceilings, bounded recovery and useful error output</td>
+</tr>
+</tbody>
+</table>
+<p>Stream records in bounded batches. Do not retain millions of Python message
+objects or emit one JSON blob per full flight to the browser. Group Parquet by
+dataset/signal family with suitable row groups; avoid one tiny file per message
+type or sensor sample.</p>
+<p>Series-query requests specify allowlisted channels, interval, source, quality
+policy and point budget. Enforce bytes-scanned, execution-time and output caps.
+Use min/max envelopes or other spike-preserving chart summaries, with exact
+evidence windows fetched on demand. Analysis operates on full-resolution data,
+with sufficient pre/post overlap at chunk boundaries.</p>
+<p>Cache by tenant, dataset/time-mapping version, channels, interval, aggregation and
+redaction policy. Benchmark on explicitly stated hardware before promising
+interactive latencies.</p>
+<h2 id="18-roadmap-and-mvp-acceptance">18. Roadmap and MVP acceptance<a class="headerlink" href="#18-roadmap-and-mvp-acceptance" title="Permanent link">&para;</a></h2>
+<h3 id="milestone-0-establish-the-evidence-contract">Milestone 0: establish the evidence contract<a class="headerlink" href="#milestone-0-establish-the-evidence-contract" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Obtain permitted, representative logs and paired onboard/telemetry recordings.</li>
+<li>Annotate the motivating case without assuming its cause.</li>
+<li>Freeze canonical identity, time, provenance and quality semantics.</li>
+<li>Define firmware-match and data-coverage policies.</li>
+</ul>
+<p><strong>Exit:</strong> two analysts can distinguish observations, interpretations and unknowns
+in the same case without relying on screenshots alone.</p>
+<h3 id="milestone-1-reliable-ardupilot-ingestion">Milestone 1: reliable ArduPilot ingestion<a class="headerlink" href="#milestone-1-reliable-ardupilot-ingestion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Tlog and DataFlash adapters, immutable artifacts and job lifecycle.</li>
+<li>Source-role inventory, clock epochs, corrupt-region diagnostics.</li>
+<li>Parameters/profile snapshots and channel coverage.</li>
+</ul>
+<p><strong>Exit:</strong> accepted input is reproducible and every normalized record can be traced
+to its original artifact; partial data cannot appear complete.</p>
+<h3 id="milestone-2-investigation-ui-and-baseline-health">Milestone 2: investigation UI and baseline health<a class="headerlink" href="#milestone-2-investigation-ui-and-baseline-health" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Armed/airborne episodes, warning grouping, mode/failsafe timeline.</li>
+<li>2D planned/flown map, linked plots and exact evidence navigation.</li>
+<li>Basic mission-transaction history and version-aware parameter audit.</li>
+<li>Vibration, radio, tracking and monitoring checks.</li>
+</ul>
+<p><strong>Exit:</strong> the motivating case can be investigated end to end without a generated
+root-cause verdict.</p>
+<h3 id="milestone-3-diagnostic-mvp">Milestone 3: diagnostic MVP<a class="headerlink" href="#milestone-3-diagnostic-mvp" title="Permanent link">&para;</a></h3>
+<ul>
+<li>A small expert-reviewed rule pack covering the eight patterns above, initially
+  prioritizing radio pre-arm failure, vibration/clipping, tracking loss and
+  compass-event association.</li>
+<li>Hypothesis ranking with contradictions and abstention.</li>
+<li>Versioned operator reports and manual annotations.</li>
+<li>Regression corpus including benign and missing-data cases.</li>
+</ul>
+<p><strong>MVP acceptance:</strong> on the motivating case, correctly distinguish the 1000/975
+issue, interpret crash <code>AngErr</code>, avoid summing clipping counters, distinguish
+takeoff from waypoint commands, and avoid treating absent completion telemetry
+as definitive non-completion. Every finding has evidence and limitations.</p>
+<h3 id="milestone-4-operational-hardening-and-expansion">Milestone 4: operational hardening and expansion<a class="headerlink" href="#milestone-4-operational-hardening-and-expansion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Tenant isolation, access/retention controls, quotas, recoverability and benchmark
+  budgets before accepting broad external uploads.</li>
+<li>PX4 ULog with its own semantic/rule pack; explicit CSV mapping.</li>
+<li>Cross-flight comparisons, improved 3D and maintenance records.</li>
+</ul>
+<h3 id="milestone-5-outcome-driven-learning">Milestone 5: outcome-driven learning<a class="headerlink" href="#milestone-5-outcome-driven-learning" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fleet condition trends and validated maintenance outcomes.</li>
+<li>Optional learned hypothesis ranking or evidence prioritization.</li>
+<li>Calibrated probabilities only if supported by held-out data.</li>
+</ul>
+<p>If time is short, cut arbitrary scripts, LLM narratives, public rule marketplaces,
+live telemetry, predictive-maintenance claims and sophisticated 3D first.
+Do not cut provenance, profile/version awareness, data-quality reporting,
+counterexample tests or the distinction between unknown and healthy.</p>
+<h2 id="19-important-challenges-to-the-original-plan">19. Important challenges to the original plan<a class="headerlink" href="#19-important-challenges-to-the-original-plan" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Move profile/parameter handling forward.</strong> It is a dependency of trustworthy
+   health and root-cause rules, not a later cosmetic feature.</li>
+<li><strong>Treat mission reconstruction as state estimation.</strong> Interrupted uploads and
+   missing messages can make the active plan genuinely unknowable.</li>
+<li><strong>Do not equate warning order with causality.</strong> Recovery actions often occur
+   after a problem has already begun.</li>
+<li><strong>A tlog cannot supply information never streamed.</strong> Requesting onboard data
+   is sometimes the correct product output.</li>
+<li><strong>“100% analyzed” must not mean “all subsystems healthy.”</strong> Publish a capability
+   and coverage matrix alongside every report.</li>
+<li><strong>Frame and sensor identity are temporal.</strong> Components can be replaced; an
+   IMU index is not a permanent physical identity.</li>
+<li><strong>A baseline may already be unhealthy.</strong> Personalized thresholds need reviewed
+   reference flights, not just the aircraft's historical average.</li>
+<li><strong>A smooth 3D replay can be misleading.</strong> Keep uncertainty and missing data
+   visible; graphics do not strengthen the underlying measurement.</li>
+<li><strong>Root-cause labels are expensive.</strong> Maintenance/inspection outcomes and
+   expert review are core product data, not optional future polish.</li>
+<li><strong>Models are optional, evidence is not.</strong> A System-One classifier may later
+    help prioritize reviewed evidence; it should not replace exact protocol
+    reconstruction or invent causal certainty.</li>
+</ol>
+<h2 id="source-notes">Source notes<a class="headerlink" href="#source-notes" title="Permanent link">&para;</a></h2>
+<p>The report combines architectural recommendations with primary-source checks.
+Version-specific crash/parameter interpretations use the verified Copter 4.7.2
+release source; the aircraft's actual binary is still unverified. General mission
+documentation and current source examples require matching against that binary
+before exact execution predicates are asserted.</p>
+<p>[1] ArduPilot Copter 4.7.2:
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/ArduCopter/crash_check.cpp">crash detector</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AC_AttitudeControl/AC_AttitudeControl.h">attitude-control interface</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AC_AttitudeControl/AC_AttitudeControl.cpp">thrust/attitude calculations</a>.</p>
+<p>[2] Copter 4.7.2:
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AP_Arming/AP_Arming.cpp">arming metadata</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AP_BattMonitor/AP_BattMonitor_Params.cpp">battery parameters</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/ArduCopter/events.cpp">failsafe handling</a>.</p>
+<p>[3] Pymavlink at <code>bd0a1b29d5b8b54b7d66abfe9ac043c528ac490f</code>:
+<a href="https://github.com/ArduPilot/pymavlink/blob/bd0a1b29d5b8b54b7d66abfe9ac043c528ac490f/mavutil.py">mavutil dispatch/log parsing</a>,
+<a href="https://github.com/ArduPilot/pymavlink/blob/bd0a1b29d5b8b54b7d66abfe9ac043c528ac490f/generator/mavgen_python.py">generated-parser behavior</a>,
+<a href="https://github.com/ArduPilot/pymavlink/blob/bd0a1b29d5b8b54b7d66abfe9ac043c528ac490f/DFReader.py">DataFlash reader</a>.</p>
+<p>[4] Mission Planner
+<a href="https://github.com/ArduPilot/MissionPlanner/blob/82dd96dfb44bccc51a6e77fcc7c309553b794f39/ExtLibs/ArduPilot/Mavlink/MAVLinkInterface.cs#L1474-L1512">timestamp writer and recording</a>;
+<a href="https://ardupilot.org/planner/docs/mission-planner-telemetry-logs.html">telemetry-log scope</a>.</p>
+<p>[5] MAVLink
+<a href="https://mavlink.io/en/guide/serialization.html">serialization</a>,
+<a href="https://mavlink.io/en/messages/common.html">message definitions</a>,
+<a href="https://mavlink.io/en/guide/routing.html">routing</a>,
+<a href="https://mavlink.io/en/guide/message_signing.html">signing</a>.</p>
+<p>[6] PX4 <a href="https://docs.px4.io/main/en/dev_log/ulog_file_format.html">ULog specification</a>;
+<a href="https://github.com/PX4/pyulog/blob/0b392f8444f843b796405b9766cc15a6dddedf62/pyulog/core.py">pyulog implementation</a>.</p>
+<p>[7] MAVLink <a href="https://mavlink.io/en/services/parameter.html">parameter protocol</a>.</p>
+<p>[8] MAVLink <a href="https://mavlink.io/en/services/heartbeat.html">heartbeat</a> and
+<a href="https://mavlink.io/en/messages/common.html#MAV_LANDED_STATE">landed state</a>.</p>
+<p>[9] Copter 4.7.2
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/ArduCopter/radio.cpp">radio handling</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/ArduCopter/AP_Arming_Copter.cpp">arming checks</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/ArduCopter/mode_auto.cpp">Auto arming</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/RC_Channel/RC_Channel.cpp">RC channel state</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AP_GPS/AP_GPS_UBLOX.cpp">u-blox configuration handling</a>.</p>
+<p>[10] Copter 4.7.2
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AP_NavEKF3/AP_NavEKF3_Measurements.cpp">EKF compass selection</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AP_NavEKF3/AP_NavEKF3.cpp">EKF primary-core handling</a>,
+<a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AP_Compass/AP_Compass.cpp">compass consistency</a>.</p>
+<p>[11] ArduPilot <a href="https://ardupilot.org/copter/docs/common-measuring-vibration.html">vibration guidance</a>;
+Copter 4.7.2 <a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AP_InertialSensor/AP_InertialSensor.cpp">vibration calculation</a>
+and <a href="https://github.com/ArduPilot/ardupilot/blob/fb773567896014da007bca58358704d4a0d8516f/libraries/AP_InertialSensor/LogStructure.h">DataFlash definitions</a>.</p>
+<p>[12] MAVLink <a href="https://mavlink.io/en/services/mission.html">mission protocol, including ArduPilot-specific notes</a>.</p>
+<p>[13] ArduPilot <a href="https://ardupilot.org/copter/docs/common-mavlink-mission-command-messages-mav_cmd.html">mission-command behavior</a>
+and <a href="https://ardupilot.org/copter/docs/auto-mode.html">Auto mode</a>.</p>
+<p>[14] FastAPI <a href="https://fastapi.tiangolo.com/tutorial/background-tasks/#caveat">background-task caveat</a>.</p>
+<p>[15] AWS <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html">presigned URL behavior</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      \"&copy; 2026 Avinash Chandra Gupta (Avinash Gupta) &middot; <a href='https://avinashistoocool.github.io/'>avinashistoocool.github.io</a>\"
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://avinashistoocool.github.io/" target="_blank" rel="noopener" title="Avinash Chandra Gupta" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/Avinashistoocool" target="_blank" rel="noopener" title="Avinash Chandra Gupta on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://www.linkedin.com/in/avinashistoocool" target="_blank" rel="noopener" title="Avinash Chandra Gupta on LinkedIn" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://x.com/suprcoolavinash" target="_blank" rel="noopener" title="Avinash Chandra Gupta on X" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="../javascripts/learn.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <style>
+      .bg { fill: #1e1e1e; }
+      .grid-line { stroke: #292929; stroke-width: 1; }
+      .grid-axis { stroke: #333333; stroke-width: 1.5; }
+      .border-frame { fill: none; stroke: #333333; stroke-width: 2; }
+      .corner-tick { fill: none; stroke: #5ab4e0; stroke-width: 2; stroke-linecap: square; }
+      
+      /* Icon styles */
+      .ring-grey { fill: none; stroke: #dcdcdc; stroke-width: 10; stroke-linecap: round; }
+      .hub-grey { fill: none; stroke: #dcdcdc; stroke-width: 7; }
+      .ring-red { fill: none; stroke: #e05a5a; stroke-width: 10; stroke-linecap: round; }
+      .hub-red { fill: #e05a5a; }
+      .tick-red { stroke: #e05a5a; stroke-width: 6; stroke-linecap: round; }
+      .dot-red { fill: #e05a5a; }
+      .path-blue { fill: none; stroke: #5ab4e0; stroke-width: 6.5; stroke-linecap: round; stroke-dasharray: 10 14; }
+
+      /* Telemetry trace background elements */
+      .trace-blue { fill: none; stroke: #5ab4e0; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; opacity: 0.85; }
+      .trace-red { fill: none; stroke: #e05a5a; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+      .trace-grey { fill: none; stroke: #dcdcdc; stroke-width: 1.5; stroke-dasharray: 4 6; opacity: 0.35; }
+      .fault-line { stroke: #e05a5a; stroke-width: 1.5; stroke-dasharray: 6 6; opacity: 0.75; }
+      
+      /* Typography */
+      .wordmark {
+        font-family: 'Inter', 'IBM Plex Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 700;
+        font-size: 108px;
+        letter-spacing: -0.02em;
+      }
+      .tagline {
+        font-family: 'Inter', 'IBM Plex Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 400;
+        font-size: 28px;
+        fill: #dcdcdc;
+        letter-spacing: 0.015em;
+        opacity: 0.92;
+      }
+      .mono-label {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+        font-size: 13px;
+        fill: #dcdcdc;
+        opacity: 0.55;
+        letter-spacing: 0.08em;
+      }
+      .mono-badge {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+        font-size: 13px;
+        font-weight: 600;
+        fill: #5ab4e0;
+        letter-spacing: 0.06em;
+      }
+      .mono-alert {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+        font-size: 12px;
+        font-weight: 600;
+        fill: #e05a5a;
+        letter-spacing: 0.06em;
+      }
+      .text-grey { fill: #dcdcdc; }
+      .text-red { fill: #e05a5a; }
+    </style>
+
+    <!-- Background Subtle Engineering Grid Pattern -->
+    <pattern id="tech-grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path class="grid-line" d="M 64 0 L 0 0 0 64" fill="none" />
+    </pattern>
+
+    <!-- Concept 2 Quad-Node Icon (360x360) -->
+    <g id="anatele-icon">
+      <circle class="ring-grey" cx="95" cy="95" r="62" />
+      <circle class="hub-grey" cx="95" cy="95" r="14" />
+
+      <circle class="ring-grey" cx="95" cy="265" r="62" />
+      <circle class="hub-grey" cx="95" cy="265" r="14" />
+
+      <circle class="ring-grey" cx="265" cy="265" r="62" />
+      <circle class="hub-grey" cx="265" cy="265" r="14" />
+
+      <path class="path-blue" d="
+        M 107 254
+        C 155 200, 225 200, 260 251
+        C 225 268, 175 262, 182 215
+        C 190 165, 205 130, 175 103
+        C 152 84, 128 92, 111 95
+        C 102 128, 130 165, 175 162
+        C 212 160, 238 135, 255 107
+      " />
+
+      <circle class="ring-red" cx="265" cy="95" r="62" />
+      <circle class="hub-red" cx="265" cy="95" r="14" />
+      <line class="tick-red" x1="265" y1="49" x2="265" y2="59" />
+      <line class="tick-red" x1="311" y1="95" x2="301" y2="95" />
+      <line class="tick-red" x1="265" y1="141" x2="265" y2="131" />
+      <circle class="dot-red" cx="291" cy="68" r="5.5" />
+    </g>
+  </defs>
+
+  <!-- 1. Solid Dark Charcoal Canvas (#1e1e1e) -->
+  <rect class="bg" width="1280" height="640" />
+  <rect width="1280" height="640" fill="url(#tech-grid)" />
+
+  <!-- 2. Outer Instrument Frame & Reticle Corner Brackets -->
+  <rect class="border-frame" x="32" y="32" width="1216" height="576" rx="8" />
+  <path class="corner-tick" d="M 32 56 L 32 32 L 56 32" />
+  <path class="corner-tick" d="M 1224 32 L 1248 32 L 1248 56" />
+  <path class="corner-tick" d="M 32 584 L 32 608 L 56 608" />
+  <path class="corner-tick" d="M 1224 608 L 1248 608 L 1248 584" />
+
+  <!-- 3. Top Instrument Header Bar -->
+  <text class="mono-label" x="64" y="72">ARDUPILOT TELEMETRY // BLACK-BOX FLIGHT RECORDER ANALYSIS</text>
+  <text class="mono-label" x="1216" y="72" text-anchor="end">OPEN-SOURCE DESKTOP TOOL</text>
+  <line class="grid-axis" x1="64" y1="90" x2="1216" y2="90" />
+
+  <!-- 4. Bottom Telemetry Waveform Strip (Subtle Diagnostic Timeline) -->
+  <line class="grid-axis" x1="64" y1="512" x2="1216" y2="512" />
+  
+  <!-- Nominal Reference Baseline -->
+  <line class="trace-grey" x1="64" y1="552" x2="1216" y2="552" />
+
+  <!-- Sky-Blue Normal Flight Telemetry Waveform (t = 0s to Event Onset) -->
+  <path class="trace-blue" d="
+    M 64 552
+    L 140 552 L 155 544 L 170 558 L 185 550 L 210 552
+    L 290 552 L 305 538 L 320 562 L 335 548 L 355 552
+    L 460 552 L 475 545 L 490 556 L 505 552
+    L 610 552 L 625 534 L 640 564 L 655 546 L 675 552
+    L 780 552 L 795 540 L 810 559 L 825 549 L 850 552
+    L 910 552
+  " />
+
+  <!-- Coral-Red Anomaly Spike & Divergence Trace -->
+  <path class="trace-red" d="
+    M 910 552
+    L 924 522 L 938 576 L 952 486 L 966 582 L 980 530 L 994 564 L 1012 552
+    L 1060 552 L 1075 568 L 1095 574 L 1216 574
+  " />
+
+  <!-- Vertical Fault Marker at Peak Anomaly (x = 952) -->
+  <line class="fault-line" x1="952" y1="455" x2="952" y2="592" />
+  <circle class="dot-red" cx="952" cy="486" r="4.5" />
+  <circle fill="none" stroke="#e05a5a" stroke-width="1.5" cx="952" cy="486" r="10" />
+  <rect x="968" y="468" width="218" height="24" rx="4" fill="#292020" stroke="#e05a5a" stroke-width="1" />
+  <text class="mono-alert" x="978" y="484">TRACKING LOSS // REC #48291</text>
+
+  <!-- Bottom Timeline Timestamps -->
+  <text class="mono-label" x="64" y="588">LOG_START [00:00.000]</text>
+  <text class="mono-label" x="480" y="588">3D_TRAJECTORY_SYNC [OK]</text>
+  <text class="mono-alert" x="952" y="600" text-anchor="middle">▲ UPSET_ONSET [04:18.420]</text>
+
+  <!-- 5. Main Center Lockup: Quad-Node Icon + AnaTele Wordmark + Tagline -->
+  <g transform="translate(104, 152) scale(0.76)">
+    <use href="#anatele-icon" />
+  </g>
+
+  <!-- Wordmark: AnaTele -->
+  <text class="wordmark" x="424" y="290">
+    <tspan class="text-grey">Ana</tspan><tspan class="text-red">T</tspan><tspan class="text-grey">ele</tspan>
+  </text>
+
+  <!-- Required Tagline -->
+  <text class="tagline" x="428" y="348">Evidence-first drone flight-log investigation</text>
+
+  <!-- Feature Pills / Technical Capabilities -->
+  <g transform="translate(428, 382)">
+    <rect x="0" y="0" width="186" height="32" rx="4" fill="#252b2e" stroke="#5ab4e0" stroke-width="1" stroke-opacity="0.5" />
+    <text class="mono-badge" x="93" y="21" text-anchor="middle">3D PATH REPLAY</text>
+
+    <rect x="202" y="0" width="204" height="32" rx="4" fill="#252b2e" stroke="#5ab4e0" stroke-width="1" stroke-opacity="0.5" />
+    <text class="mono-badge" x="304" y="21" text-anchor="middle">RANKED HYPOTHESES</text>
+
+    <rect x="422" y="0" width="214" height="32" rx="4" fill="#252b2e" stroke="#5ab4e0" stroke-width="1" stroke-opacity="0.5" />
+    <text class="mono-badge" x="529" y="21" text-anchor="middle">EXACT LOG TRACEABILITY</text>
+  </g>
+</svg>
